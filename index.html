@@ -1,0 +1,1937 @@
+<!doctype html>
+<html lang="ky">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Bilim — study app for students in Kyrgyzstan: ORT-style quizzes, flashcards, a focus timer and an ideas board. Кыргызча, русский, English.">
+<meta name="theme-color" content="#FFFFFF">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bilim">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px/1.4 system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<script>window.BILIM_BUILD = "app";</script>
+<script src="firebase-config.js"></script>
+<title>Bilim</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Onest:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: app shell. Sticky top bar with tabs (a bottom tab bar on phones). A language picker greets first-time visitors. Home opens on a night-sky climb up the Tian Shan, then today's goal beside the question of the day, study rooms and badges. */
+:root{
+  --bg:#EDF1F7; --surface:#FFFFFF; --surface-2:#E3E8F1; --line:#CFD7E5;
+  --ink:#0F1630; --muted:#55607C;
+  --sun:#F4512C; --on-sun:#1B0A04; --sun-soft:#FFE2DA;
+  --gold:#E9A100; --gold-soft:#FFF0C4;
+  --glacier:#0A8C88; --glacier-soft:#D2F0ED;
+  --good:#18975A; --bad:#C92F2B;
+  --sky-top:#141E48; --sky-bottom:#2C428C; --mount-far:#3B52A0; --mount:#22336F; --mount-near:#121B40; --snow:#F2F5FF;
+  --on-dark:#F4F6FD; --on-dark-muted:#BAC4E8; --glass:rgba(255,255,255,.12); --glass-line:rgba(255,255,255,.28);
+  --shadow:0 1px 2px rgba(15,22,48,.06),0 14px 34px -18px rgba(15,22,48,.3);
+  --f-display:"Unbounded",system-ui,sans-serif;
+  --f-body:"Onest",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#090E1E; --surface:#111933; --surface-2:#1A2441; --line:#283453;
+  --ink:#ECF0FA; --muted:#98A3C2;
+  --sun:#FF6B4A; --sun-soft:#3C1A12;
+  --gold:#FFC23D; --gold-soft:#3A2C0B;
+  --glacier:#2DC7BF; --glacier-soft:#0E3033;
+  --good:#46D18A; --bad:#FF6B66;
+  --sky-top:#070C26; --sky-bottom:#18245C; --mount-far:#2A3A78; --mount:#1A2757; --mount-near:#0B1231; --snow:#E6ECFF;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 14px 34px -16px rgba(0,0,0,.7);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#090E1E; --surface:#111933; --surface-2:#1A2441; --line:#283453;
+  --ink:#ECF0FA; --muted:#98A3C2;
+  --sun:#FF6B4A; --sun-soft:#3C1A12;
+  --gold:#FFC23D; --gold-soft:#3A2C0B;
+  --glacier:#2DC7BF; --glacier-soft:#0E3033;
+  --good:#46D18A; --bad:#FF6B66;
+  --sky-top:#070C26; --sky-bottom:#18245C; --mount-far:#2A3A78; --mount:#1A2757; --mount-near:#0B1231; --snow:#E6ECFF;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 14px 34px -16px rgba(0,0,0,.7);
+  color-scheme:dark}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+html.lock,html.lock body{overflow:hidden}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--glacier);outline-offset:2px;border-radius:10px}
+h1,h2,h3{font-family:var(--f-display);line-height:1.15;text-wrap:balance;margin:0;font-weight:700;letter-spacing:-.01em}
+p{margin:0}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.wrap{max-width:1100px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--sun)}
+.lede{color:var(--muted);max-width:62ch;margin-top:6px}
+.h1{font-size:clamp(24px,3.4vw,32px)}
+.hint{font-size:13px;color:var(--muted)}
+
+/* ---------- top bar ---------- */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:color-mix(in srgb,var(--surface) 94%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.top-row{display:flex;align-items:center;gap:12px;padding-block:10px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;margin-right:auto;min-width:0}
+.logo{width:36px;height:36px;flex:none;display:block}
+.lg-bg{fill:var(--sky-top)} .lg-far{fill:var(--mount-far)} .lg-snow{fill:var(--snow)} .lg-star{fill:var(--gold)}
+.brand-txt b{font-family:var(--f-display);font-weight:800;font-size:20px;letter-spacing:-.02em;display:block;line-height:1}
+.brand-txt small{display:block;font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:4px;line-height:1}
+.tabs{display:flex;gap:2px}
+.tab{padding:8px 13px;border-radius:999px;font-weight:600;font-size:14px;color:var(--muted);text-decoration:none;white-space:nowrap}
+.tab:hover{color:var(--ink);background:var(--surface-2)}
+.tab[aria-current="page"]{background:var(--ink);color:var(--bg)}
+.top-actions{display:flex;align-items:center;gap:8px}
+.xp-pill{display:flex;align-items:center;gap:10px;font-family:var(--f-mono);font-size:13px;background:var(--gold-soft);padding:7px 12px;border-radius:999px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.xp-pill .alt-mini{color:var(--muted)}
+.icon-btn{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;padding:0}
+.lang-btn{height:38px;min-width:50px;padding:0 10px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-size:12px;letter-spacing:.06em}
+.lang-btn:hover,.icon-btn:hover{border-color:var(--ink)}
+.avatar{width:38px;height:38px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:15px;text-decoration:none;flex:none}
+.avatar span{display:grid;place-items:center}
+.avatar[aria-current="page"]{box-shadow:0 0 0 3px var(--gold)}
+.bottom-nav{display:none}
+
+/* ---------- buttons ---------- */
+.btn{border:0;border-radius:12px;padding:11px 18px;font-weight:700;font-size:15px;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;line-height:1.2;transition:transform .12s ease,filter .12s ease}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-sun{background:var(--sun);color:var(--on-sun)}
+.btn-ink{background:var(--ink);color:var(--bg)}
+.btn-ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line)}
+.btn-ghost:hover{box-shadow:inset 0 0 0 1.5px var(--ink)}
+.btn-glass{background:var(--glass);color:var(--on-dark);box-shadow:inset 0 0 0 1px var(--glass-line)}
+.btn-bad{background:transparent;color:var(--bad);box-shadow:inset 0 0 0 1.5px var(--bad)}
+.btn-sm{padding:8px 12px;font-size:13px;border-radius:10px}
+
+/* ---------- layout ---------- */
+main{padding-block:24px 40px}
+.view{display:grid;gap:22px;animation:rise .35s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{transform:translateY(8px)}to{transform:none}}
+.page-head{display:grid;gap:4px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px;min-width:0}
+.panel h3{font-size:16px;margin-bottom:12px}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:12px}
+.section-head h2{font-size:22px;margin-top:4px}
+.link{font-weight:600;font-size:14px;text-underline-offset:3px;white-space:nowrap}
+
+/* ---------- climb hero ---------- */
+.climb{position:relative;border-radius:26px;overflow:hidden;background:linear-gradient(180deg,var(--sky-top),var(--sky-bottom));color:var(--on-dark);display:flex;flex-direction:column;box-shadow:var(--shadow)}
+.climb-text{position:relative;z-index:1;display:grid;gap:12px;padding:24px 22px 6px;max-width:560px}
+.climb .scene{display:block;width:100%;height:auto;aspect-ratio:545/302;max-width:100%}
+.climb.mid .scene{aspect-ratio:1000/320}
+.climb.wide{min-height:380px}
+.climb.wide .scene{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto}
+.climb.wide .climb-text{max-width:min(54%,560px);padding:34px 36px}
+.climb h1{font-size:clamp(26px,3.8vw,40px);font-weight:800;letter-spacing:-.025em;color:var(--on-dark)}
+.climb-sub{color:var(--on-dark-muted);max-width:46ch;font-size:15px}
+.eyebrow.on-dark{color:var(--gold)}
+.lvl{display:grid;gap:8px;max-width:400px}
+.lvl-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:14px;color:var(--on-dark-muted);flex-wrap:wrap}
+.lvl-row b{color:var(--on-dark);font-size:15px}
+.lvlbar{height:10px;border-radius:99px;background:var(--glass);overflow:hidden}
+.lvlbar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--gold),var(--sun));transition:width .7s cubic-bezier(.2,.8,.2,1)}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+.scene .far{fill:var(--mount-far);opacity:.55}
+.scene .massif{fill:var(--mount)}
+.scene .near{fill:var(--mount-near)}
+.scene .snow{fill:var(--snow)}
+.scene .sun{fill:var(--gold)}
+.scene .gs{stop-color:var(--gold)}
+.scene .star{fill:var(--snow)}
+.scene .tw{animation:tw 3.2s ease-in-out infinite}
+@keyframes tw{50%{opacity:.12}}
+.scene .trail{fill:none;stroke:var(--gold);stroke-width:2.4;stroke-dasharray:2 7;stroke-linecap:round;opacity:.9}
+.scene .cp{fill:var(--mount);stroke:var(--gold);stroke-width:2}
+.scene .cp.on{fill:var(--gold)}
+.scene .pole{stroke:var(--snow);stroke-width:2}
+.scene .flag{fill:var(--sun)}
+.scene .pulse{fill:var(--sun);transform-box:fill-box;transform-origin:center;animation:pulse 2.2s ease-out infinite}
+@keyframes pulse{0%{transform:scale(.6);opacity:.55}100%{transform:scale(2);opacity:0}}
+.scene .dot{fill:var(--sun);stroke:var(--snow);stroke-width:2.5}
+
+/* ---------- today + daily ---------- */
+.duo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:16px}
+.today{display:grid;gap:16px;align-content:start}
+.panel-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.panel-top h2{font-size:16px}
+.streak{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--sun);background:var(--sun-soft);padding:5px 10px;border-radius:999px;white-space:nowrap}
+.streak span{display:inline-grid}
+.ring-row{display:flex;align-items:center;gap:18px}
+.ring{width:104px;height:104px;flex:none}
+.ring .track{fill:none;stroke:var(--surface-2);stroke-width:12}
+.ring .arc{fill:none;stroke:var(--sun);stroke-width:12;stroke-linecap:round;transition:stroke-dashoffset .7s cubic-bezier(.2,.8,.2,1)}
+.ring .num{font-family:var(--f-display);font-weight:700;font-size:24px;fill:var(--ink)}
+.ring .unit{font-family:var(--f-body);font-size:9px;font-weight:700;letter-spacing:.08em;fill:var(--muted)}
+.goal-msg{font-family:var(--f-display);font-size:15px;display:block}
+.goal-sub{color:var(--muted);font-size:14px;margin-top:4px}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.day{text-align:center;font-size:11px;color:var(--muted);display:grid;gap:4px}
+.day i{display:block;height:28px;border-radius:8px;background:linear-gradient(to top,var(--sun) var(--p,0%),var(--surface-2) var(--p,0%))}
+.day.now{color:var(--ink);font-weight:700}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.stat{background:var(--surface-2);border-radius:12px;padding:10px 12px;min-width:0}
+.stat b{display:block;font-family:var(--f-display);font-size:19px;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted)}
+.daily{display:grid;gap:14px;align-content:start}
+.daily-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.reward{margin-left:auto;font-family:var(--f-mono);font-size:12px;background:var(--gold-soft);padding:4px 9px;border-radius:999px}
+.tag{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:6px;background:var(--surface-2)}
+.d-note{font-size:13px;color:var(--muted);margin-top:8px}
+
+/* ---------- rooms + badges ---------- */
+.rooms{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.room{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;text-decoration:none;display:grid;gap:8px;align-content:start;transition:transform .15s ease,border-color .15s ease}
+.room:hover{transform:translateY(-3px);border-color:var(--ink)}
+.room .ico{width:44px;height:44px;border-radius:13px;display:grid;place-items:center}
+.room h3{font-size:15px}
+.room p{font-size:13px;color:var(--muted)}
+.room .meta{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.badge-strip{display:flex;gap:12px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:thin}
+.badge{flex:none;width:80px;display:grid;justify-items:center;gap:6px;font-size:11px;line-height:1.25;text-align:center;color:var(--muted)}
+.badge.got{color:var(--ink);font-weight:600}
+.b-ico{width:50px;height:50px;border-radius:15px;display:grid;place-items:center;background:var(--surface);color:var(--muted);border:1.5px dashed var(--line);flex:none}
+.got .b-ico{background:var(--gold);color:var(--on-sun);border:1.5px solid var(--gold)}
+.badge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.badge-card{display:flex;gap:12px;align-items:center;padding:12px;border-radius:14px;background:var(--surface-2);min-width:0}
+.badge-card b{display:block;font-size:14px}
+.badge-card span{font-size:12px;color:var(--muted)}
+.badge-card.got{background:var(--gold-soft)}
+
+/* ---------- chips + quiz ---------- */
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chips.scroll{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.chips.scroll::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-weight:600;font-size:14px;white-space:nowrap}
+.chip:hover{border-color:var(--ink)}
+.chip[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:var(--bg)}
+.chip-review{border-style:dashed;border-color:var(--sun);color:var(--sun)}
+.chip-review[aria-pressed="true"]{background:var(--sun);border-color:var(--sun);color:var(--on-sun)}
+.quiz{display:grid;gap:18px}
+.qmeta{display:flex;justify-content:space-between;gap:12px;font-size:13px;color:var(--muted);font-family:var(--f-mono);flex-wrap:wrap}
+.bar{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--glacier);border-radius:99px;transition:width .35s ease}
+.qtext{font-family:var(--f-display);font-size:clamp(17px,2.3vw,22px);font-weight:700;line-height:1.3;text-wrap:balance}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{border:1.5px solid var(--line);background:var(--surface);border-radius:14px;padding:13px 14px;text-align:left;font-weight:600;display:flex;gap:12px;align-items:center;min-width:0;transition:border-color .15s,background-color .15s,transform .12s}
+.opt span{min-width:0;overflow-wrap:anywhere}
+.opt:hover:not(:disabled){border-color:var(--ink);transform:translateY(-1px)}
+.opt kbd{font-family:var(--f-mono);font-size:12px;width:26px;height:26px;border-radius:8px;background:var(--surface-2);display:grid;place-items:center;flex:none}
+.opt:disabled{cursor:default;color:inherit}
+.opt.right{border-color:var(--good);background:color-mix(in srgb,var(--good) 14%,var(--surface))}
+.opt.right kbd{background:var(--good);color:var(--surface)}
+.opt.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,var(--surface))}
+.opt.wrong kbd{background:var(--bad);color:var(--surface)}
+.explain{background:var(--glacier-soft);border-radius:14px;padding:13px 16px;font-size:15px}
+.explain b{color:var(--glacier)}
+.qfoot{display:flex;justify-content:flex-end;margin-top:12px}
+.result{text-align:center;display:grid;gap:10px;justify-items:center;padding-block:18px}
+.result .big{font-family:var(--f-display);font-size:64px;font-weight:800;line-height:1;color:var(--sun)}
+.result .big small{font-size:28px;color:var(--muted)}
+.r-msg{color:var(--muted);max-width:40ch}
+.r-xp{font-size:13px;background:var(--gold-soft);padding:4px 10px;border-radius:999px}
+.r-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+
+/* ---------- flashcards ---------- */
+.cardstage{perspective:1200px;display:grid;justify-items:center;gap:14px;padding-block:6px}
+.fcard{width:min(480px,100%);aspect-ratio:3/2;max-width:100%;position:relative;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.2,.8,.2,1);border:0;background:none;padding:0;color:inherit;border-radius:24px}
+.fcard.flip{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;border-radius:24px;display:grid;place-items:center;padding:30px 22px;-webkit-backface-visibility:hidden;backface-visibility:hidden;text-align:center}
+.face.front{background:var(--surface);border:1.5px solid var(--line);box-shadow:var(--shadow)}
+.face.back{background:linear-gradient(160deg,var(--sky-bottom),var(--sky-top));color:var(--on-dark);transform:rotateY(180deg)}
+.face .w{font-family:var(--f-display);font-size:clamp(22px,4vw,32px);font-weight:700;line-height:1.2;overflow-wrap:anywhere}
+.face .w.long{font-family:var(--f-body);font-size:clamp(16px,2.6vw,21px);font-weight:600;line-height:1.35}
+.face small{position:absolute;top:14px;left:18px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.65}
+.face .tap{position:absolute;bottom:12px;left:0;right:0;font-size:12px;opacity:.55}
+.fc-progress{width:min(480px,100%);height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.fc-progress i{display:block;height:100%;width:0;background:var(--gold);transition:width .3s}
+.fc-ctrl{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.fc-count{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+
+/* ---------- ideas ---------- */
+.compose{display:grid;gap:10px}
+.textarea{width:100%;min-height:96px;resize:vertical;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--bg)}
+.compose-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.select{border:1.5px solid var(--line);border-radius:10px;padding:9px 10px;background:var(--surface)}
+.posting{font-size:13px;color:var(--muted)}
+.count{font-family:var(--f-mono);font-size:12px;color:var(--muted);margin-left:auto}
+.notice{background:var(--gold-soft);border-radius:12px;padding:11px 14px;font-size:14px}
+.toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between}
+.toolbar .chips{flex:1;min-width:0}
+.ideas{columns:3 260px;column-gap:14px}
+.idea{break-inside:avoid;margin-bottom:14px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:grid;gap:10px}
+.idea-text{white-space:pre-wrap;overflow-wrap:anywhere}
+.idea-top{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.idea-foot{display:flex;gap:8px;align-items:center}
+.like{border:1.5px solid var(--line);background:transparent;border-radius:999px;padding:4px 11px;font-size:13px;font-weight:600;display:inline-flex;gap:6px;align-items:center;font-variant-numeric:tabular-nums}
+.like span{display:grid}
+.like[aria-pressed="true"]{border-color:var(--sun);color:var(--sun);background:var(--sun-soft)}
+.like[aria-pressed="true"] svg{fill:currentColor}
+.del{margin-left:auto;border:0;background:transparent;color:var(--muted);font-size:13px;padding:4px 6px}
+.del:hover{color:var(--bad)}
+.empty{text-align:center;color:var(--muted);padding:30px 14px;border:2px dashed var(--line);border-radius:16px}
+
+/* ---------- focus ---------- */
+.focus{display:grid;grid-template-columns:auto minmax(0,1fr);gap:32px;align-items:center}
+.timer{width:250px;height:250px;max-width:100%}
+.timer .track{fill:none;stroke:var(--surface-2);stroke-width:14}
+.timer .arc{fill:none;stroke:var(--glacier);stroke-width:14;stroke-linecap:round;transition:stroke-dashoffset .25s linear,stroke .3s}
+.timer .arc.brk{stroke:var(--gold)}
+.timer .t{font-family:var(--f-mono);font-weight:700;font-size:44px;fill:var(--ink)}
+.timer .m{font-family:var(--f-body);font-weight:700;font-size:11px;letter-spacing:.16em;fill:var(--muted)}
+.focus-side{display:grid;gap:14px;min-width:0}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.sessions{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.sessions i{width:12px;height:12px;border-radius:50%;background:var(--surface-2);display:inline-block}
+.sessions i.on{background:var(--glacier)}
+.tips{margin:0;padding-left:20px;color:var(--muted);display:grid;gap:6px;font-size:15px}
+
+/* ---------- profile ---------- */
+.me-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.form{display:grid;gap:14px}
+.field{display:grid;gap:6px}
+.field label{font-size:13px;font-weight:600;color:var(--muted)}
+.input{border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg);width:100%}
+.switch{display:flex;align-items:center;gap:10px;font-weight:600;cursor:pointer}
+.switch input{width:18px;height:18px;accent-color:var(--glacier)}
+.statlist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0}
+.statlist div{background:var(--surface-2);border-radius:12px;padding:10px 12px;min-width:0}
+.statlist dt{font-size:12px;color:var(--muted)}
+.statlist dd{margin:0;font-family:var(--f-display);font-size:18px;font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.stack{display:grid;gap:12px}
+
+/* ---------- language picker ---------- */
+.welcome{position:fixed;inset:0;z-index:25;display:grid;place-items:center;overflow:auto;background:linear-gradient(180deg,var(--sky-top),var(--sky-bottom));color:var(--on-dark);padding-top:max(24px,env(safe-area-inset-top,0px));padding-bottom:max(24px,env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.welcome .w-scene{position:absolute;left:0;right:0;bottom:0;width:100%;height:44%;pointer-events:none}
+.welcome .w-stars{position:absolute;inset:0;width:100%;height:60%;pointer-events:none}
+.welcome-card:focus{outline:none}
+.welcome-card{position:relative;z-index:1;width:min(620px,100%);display:grid;justify-items:center;gap:14px;text-align:center;padding-block:12px}
+.w-logo{width:68px;height:68px;filter:drop-shadow(0 10px 24px rgba(0,0,0,.35))}
+.w-brand{font-family:var(--f-display);font-weight:800;font-size:24px;letter-spacing:-.02em}
+.welcome h1{font-size:clamp(26px,5vw,40px);font-weight:800;color:var(--on-dark);display:grid;gap:6px}
+.welcome h1 span{font-size:.55em;color:var(--on-dark-muted);font-weight:700}
+.w-sub{color:var(--on-dark-muted);font-size:15px}
+.w-langs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;width:100%;margin-top:6px}
+.w-lang{display:grid;justify-items:center;gap:8px;padding:22px 12px;border-radius:22px;border:1px solid var(--glass-line);background:var(--glass);color:var(--on-dark);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);transition:transform .15s ease,border-color .15s ease}
+.w-lang:hover{transform:translateY(-3px);border-color:var(--gold)}
+.w-lang .code{width:50px;height:50px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:13px;background:var(--gold);color:var(--on-sun)}
+.w-lang b{font-family:var(--f-display);font-size:19px;font-weight:700}
+.w-lang .sub{font-size:13px;color:var(--on-dark-muted)}
+.w-note{font-size:13px;color:var(--on-dark-muted);max-width:44ch}
+
+/* ---------- toast, confetti, footer ---------- */
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,30px);opacity:0;background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:14px;font-weight:600;font-size:14px;transition:transform .25s ease,opacity .25s ease;z-index:20;pointer-events:none;max-width:calc(100% - 32px);text-align:center}
+.toast.show{transform:translate(-50%,0);opacity:1}
+#confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:30}
+footer{color:var(--muted);font-size:13px;padding-block:4px 32px;display:flex;gap:6px 16px;flex-wrap:wrap;justify-content:space-between}
+
+/* ---------- responsive ---------- */
+@media (max-width:980px){.tab{padding:8px 10px;font-size:13px}}
+@media (max-width:900px){
+  .rooms{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .duo,.me-grid{grid-template-columns:minmax(0,1fr)}
+  .focus{grid-template-columns:minmax(0,1fr);justify-items:center}
+  .focus-side{width:100%}
+}
+@media (max-width:960px){
+  .tabs{display:none}
+  .xp-pill .alt-mini{display:none}
+  .bottom-nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));position:fixed;left:0;right:0;bottom:0;z-index:9;background:color-mix(in srgb,var(--surface) 94%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding-top:6px;padding-bottom:calc(6px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .bottom-nav a{display:grid;justify-items:center;gap:2px;padding:4px 0;font-size:11px;font-weight:600;color:var(--muted);text-decoration:none;min-width:0}
+  .bottom-nav .bn-ico{display:grid;place-items:center;width:52px;height:30px;border-radius:999px;transition:background-color .15s}
+  .bottom-nav .bn-label{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bottom-nav a[aria-current="page"]{color:var(--ink)}
+  .bottom-nav a[aria-current="page"] .bn-ico{background:var(--gold-soft)}
+  .toast{bottom:calc(88px + env(safe-area-inset-bottom,0px))}
+  footer{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+}
+@media (max-width:520px){
+  .opts{grid-template-columns:minmax(0,1fr)}
+  .brand-txt small,.hide-sm{display:none}
+  .climb-text{padding:20px 18px 4px}
+  .rooms{gap:10px}
+  .room{padding:14px}
+  .panel{padding:16px}
+  .toolbar{flex-wrap:wrap}
+  .top-row{gap:8px}
+  .top-actions{gap:6px}
+  .lang-btn{min-width:44px;padding:0 8px}
+}
+@media (max-width:560px){.w-langs{grid-template-columns:minmax(0,1fr)}.w-lang{grid-template-columns:auto 1fr;justify-items:start;text-align:left;align-items:center;padding:16px 18px;column-gap:14px}.w-lang .code{grid-row:span 2}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-row">
+    <a class="brand" href="#home" aria-label="Bilim">
+      <svg class="logo" viewBox="0 0 40 40" aria-hidden="true">
+        <rect width="40" height="40" rx="11" class="lg-bg"/>
+        <path class="lg-far" d="M3 31 L13 19 L19 25 L26 14 L37 31 Z"/>
+        <path class="lg-snow" d="M26 14 L29.2 19 L27.6 18.2 L26.2 19.8 L24.6 18.3 L22.8 19 Z"/>
+        <polygon class="lg-star" points="12,6.4 12.88,8.79 15.42,8.89 13.43,10.46 14.12,12.91 12,11.5 9.88,12.91 10.57,10.46 8.58,8.89 11.12,8.79"/>
+      </svg>
+      <span class="brand-txt"><b>Bilim</b><small data-t="brandSub">Чогуу окуйбуз</small></span>
+    </a>
+    <nav class="tabs" data-t-aria="navAria">
+      <a class="tab" href="#home" data-tab="home" data-t="navHome">Башкы</a>
+      <a class="tab" href="#practice" data-tab="practice" data-t="navPractice">Тесттер</a>
+      <a class="tab" href="#cards" data-tab="cards" data-t="navCards">Карточкалар</a>
+      <a class="tab" href="#ideas" data-tab="ideas" data-t="navIdeas">Идеялар</a>
+      <a class="tab" href="#focus" data-tab="focus" data-t="navFocus">Фокус</a>
+    </nav>
+    <div class="top-actions">
+      <span class="xp-pill" data-t-title="xpTitle"><span class="alt-mini" id="altTop">800 м</span><span><b id="xpTop">0</b> XP</span></span>
+      <button type="button" class="lang-btn" id="langBtn" data-t-aria="langAria">КЫР</button>
+      <button type="button" class="icon-btn app-only" id="themeBtn" hidden></button>
+      <button type="button" class="btn btn-sun btn-sm hide-sm" id="installBtn" hidden data-t="install">Орнотуу</button>
+      <a class="avatar" href="#me" id="avatarBtn" data-t-aria="profileAria"><span id="avatarTxt"></span></a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+<!-- ================= HOME ================= -->
+<section class="view" data-view="home">
+  <div class="climb" id="climb">
+    <svg class="scene" id="scene" viewBox="455 18 545 302" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+      <defs><radialGradient id="sunGlow"><stop offset="0" class="gs" stop-opacity=".42"/><stop offset="1" class="gs" stop-opacity="0"/></radialGradient></defs>
+      <g id="stars"></g>
+      <circle cx="938" cy="92" r="70" fill="url(#sunGlow)"/>
+      <circle class="sun" cx="938" cy="92" r="24"/>
+      <path class="far" d="M0 232 L60 196 L110 214 L180 160 L240 200 L300 172 L360 210 L420 176 L470 204 L530 168 L600 198 L660 150 L720 190 L780 160 L860 196 L940 156 L1000 184 L1000 320 L0 320 Z"/>
+      <path class="massif" d="M470 320 L640 190 L680 205 L820 56 L900 150 L940 140 L1000 190 L1000 320 Z"/>
+      <path class="snow" d="M820 56 L857.4 100 L846 95 L836 106 L824 96 L812 105 L800 97 L788 104 L778.7 100 Z"/>
+      <path class="near" d="M0 320 L0 268 L90 252 L180 270 L270 248 L360 274 L450 258 L540 282 L640 266 L740 290 L840 272 L940 286 L1000 278 L1000 320 Z"/>
+      <path class="trail" id="trail" d="M500 306"/>
+      <g id="checkpoints"></g>
+      <line class="pole" x1="820" y1="57" x2="820" y2="28"/>
+      <path class="flag" d="M820 28 L848 35 L820 42 Z"/>
+      <g id="marker" transform="translate(500 306)"><circle class="pulse" r="13"/><circle class="dot" r="7"/></g>
+    </svg>
+    <div class="climb-text">
+      <span class="eyebrow on-dark" id="hello">Салам</span>
+      <h1 id="lvlName">Чокуга чыгууну башта</h1>
+      <p class="climb-sub" data-t="climbSub">Ар бир XP — Бишкектен Жеңиш чокусуна карай бир кадам.</p>
+      <div class="lvl">
+        <div class="lvl-row"><b class="mono" id="lvlAlt">800 м</b><span id="lvlNext"></span></div>
+        <div class="lvlbar" aria-hidden="true"><i id="lvlBar"></i></div>
+      </div>
+      <div class="hero-actions">
+        <a class="btn btn-sun" href="#practice" data-t="heroQuiz">Тест баштоо</a>
+        <a class="btn btn-glass" href="#cards" data-t="heroCards">Карточкалар</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="duo">
+    <div class="panel today">
+      <div class="panel-top"><h2 data-t="today">Бүгүн</h2><span class="streak"><span data-ico="flame" data-size="16"></span><span id="streakTxt">0</span></span></div>
+      <div class="ring-row">
+        <svg class="ring" viewBox="0 0 120 120" role="img" data-t-aria="ringAria">
+          <circle class="track" cx="60" cy="60" r="50"/>
+          <circle class="arc" id="goalArc" cx="60" cy="60" r="50" stroke-dasharray="314.16" stroke-dashoffset="314.16" transform="rotate(-90 60 60)"/>
+          <text x="60" y="63" text-anchor="middle" class="num" id="goalNum">0</text>
+          <text x="60" y="81" text-anchor="middle" class="unit" id="goalOf"></text>
+        </svg>
+        <div><b class="goal-msg" id="goalMsg"></b><p class="goal-sub" id="goalSub"></p></div>
+      </div>
+      <div class="week" id="week"></div>
+      <div class="stats">
+        <div class="stat"><b id="sQuiz">0</b><span data-t="statQuiz">тест</span></div>
+        <div class="stat"><b id="sCards">0</b><span data-t="statCards">карточка</span></div>
+        <div class="stat"><b id="sFocus">0</b><span data-t="statFocus">фокус мүнөт</span></div>
+      </div>
+    </div>
+    <div class="panel daily" id="daily"></div>
+  </div>
+
+  <div class="section-head"><div><span class="eyebrow" data-t="roomsEyebrow">Бөлүмдөр</span><h2 data-t="roomsTitle">Эмне менен алектенесиң?</h2></div></div>
+  <div class="rooms">
+    <a class="room" href="#practice"><span class="ico" style="background:var(--sun-soft);color:var(--sun)" data-ico="practice"></span><h3 data-t="roomPracticeT">Тесттер</h3><p data-t="roomPracticeD"></p><span class="meta" id="metaPractice"></span></a>
+    <a class="room" href="#cards"><span class="ico" style="background:var(--glacier-soft);color:var(--glacier)" data-ico="cards"></span><h3 data-t="roomCardsT">Карточкалар</h3><p data-t="roomCardsD"></p><span class="meta" id="metaCards"></span></a>
+    <a class="room" href="#ideas"><span class="ico" style="background:var(--gold-soft);color:var(--ink)" data-ico="bulb"></span><h3 data-t="roomIdeasT">Идеялар тактасы</h3><p data-t="roomIdeasD"></p><span class="meta" data-t="roomIdeasM"></span></a>
+    <a class="room" href="#focus"><span class="ico" style="background:var(--surface-2);color:var(--ink)" data-ico="timer"></span><h3 data-t="roomFocusT">Фокус таймер</h3><p data-t="roomFocusD"></p><span class="meta" data-t="roomFocusM"></span></a>
+  </div>
+
+  <div class="section-head"><div><span class="eyebrow" data-t="badgesEyebrow">Белгилер</span><h2 id="badgeHead"></h2></div><a class="link" href="#me" data-t="seeAll">Баарын көрүү</a></div>
+  <div class="badge-strip" id="badgeStrip"></div>
+</section>
+
+<!-- ================= PRACTICE ================= -->
+<section class="view" data-view="practice" hidden>
+  <div class="page-head"><span class="eyebrow" data-t="prEyebrow">Тесттер</span><h2 class="h1" data-t="prTitle">Тез тест</h2><p class="lede" data-t="prLede"></p></div>
+  <div class="chips" id="subjects" role="group" data-t-aria="subjAria"></div>
+  <div class="panel"><div class="quiz" id="quiz"></div></div>
+  <p class="hint" data-t="prHint"></p>
+</section>
+
+<!-- ================= FLASHCARDS ================= -->
+<section class="view" data-view="cards" hidden>
+  <div class="page-head"><span class="eyebrow" data-t="cdEyebrow">Карточкалар</span><h2 class="h1" data-t="cdTitle">Карточканы бур жана эсте</h2><p class="lede" data-t="cdLede"></p></div>
+  <div class="chips" id="decks" role="group" data-t-aria="decksAria"></div>
+  <div class="panel">
+    <div class="cardstage">
+      <div class="fc-progress" aria-hidden="true"><i id="fcBar"></i></div>
+      <button type="button" class="fcard" id="fcard" data-t-aria="flipAria">
+        <span class="face front"><small id="fcLabelF"></small><span class="w" id="fcFront"></span><span class="tap" data-t="tapFlip">Буруу үчүн бас</span></span>
+        <span class="face back"><small id="fcLabelB"></small><span class="w" id="fcBack"></span></span>
+      </button>
+      <p class="fc-count" id="fcCount"></p>
+      <div class="fc-ctrl"><button type="button" class="btn btn-ghost" id="fcAgain" data-t="cardAgain">Дагы бир жолу</button><button type="button" class="btn btn-ink" id="fcKnew">Билем</button></div>
+    </div>
+  </div>
+  <p class="hint" data-t="cdHint"></p>
+</section>
+
+<!-- ================= IDEAS ================= -->
+<section class="view" data-view="ideas" hidden>
+  <div class="page-head"><span class="eyebrow" data-t="idEyebrow">Идеялар тактасы</span><h2 class="h1" data-t="idTitle">Сен кантип окуйсуң?</h2><p class="lede" data-t="idLede"></p></div>
+  <div class="panel">
+    <form class="compose" id="compose">
+      <label for="ideaText" class="eyebrow" style="color:var(--muted)" data-t="idLabel">Сенин идеяң</label>
+      <textarea class="textarea" id="ideaText" maxlength="280" data-t-ph="idPh"></textarea>
+      <div class="compose-row">
+        <select class="select" id="ideaSubject" data-t-aria="idSubjAria">
+          <option value="General" data-t="subj_General">Жалпы</option>
+          <option value="Math" data-t="subj_Math">Математика</option>
+          <option value="History" data-t="subj_History">Тарых</option>
+          <option value="Geography" data-t="subj_Geography">География</option>
+          <option value="English" data-t="subj_English">Англис тили</option>
+          <option value="Science" data-t="subj_Science">Табигый илимдер</option>
+          <option value="Kyrgyz" data-t="subj_Kyrgyz">Кыргыз тили</option>
+          <option value="Russian" data-t="subj_Russian">Орус тили</option>
+          <option value="ORT" data-t="subj_ORT">ЖРТ</option>
+        </select>
+        <span class="posting" id="postingAs"></span>
+        <span class="count" id="ideaCount">0 / 280</span>
+        <button class="btn btn-sun" type="submit" id="ideaPost" data-t="idShare">Бөлүшүү</button>
+      </div>
+      <p class="notice" id="ideaNotice" hidden></p>
+    </form>
+  </div>
+  <div class="toolbar">
+    <div class="chips scroll" id="ideaFilter" role="group" data-t-aria="filterAria"></div>
+    <select class="select" id="ideaSort" data-t-aria="sortAria"><option value="new" data-t="sortNew">Адегенде жаңылары</option><option value="top" data-t="sortTop">Эң көп жаккандар</option></select>
+  </div>
+  <div><p class="empty" id="ideasEmpty"></p><div class="ideas" id="ideas"></div></div>
+</section>
+
+<!-- ================= FOCUS ================= -->
+<section class="view" data-view="focus" hidden>
+  <div class="page-head"><span class="eyebrow" data-t="fcEyebrow">Фокус</span><h2 class="h1" data-t="fcTitle">Бир тапшырма, 25 мүнөт</h2><p class="lede" data-t="fcLede"></p></div>
+  <div class="panel focus">
+    <svg class="timer" viewBox="0 0 250 250" role="img" data-t-aria="timerAria">
+      <circle class="track" cx="125" cy="125" r="104"/>
+      <circle class="arc" id="tArc" cx="125" cy="125" r="104" stroke-dasharray="653.45" stroke-dashoffset="0" transform="rotate(-90 125 125)"/>
+      <text x="125" y="135" text-anchor="middle" class="t" id="tTime">25:00</text>
+      <text x="125" y="163" text-anchor="middle" class="m" id="tMode">ФОКУС</text>
+    </svg>
+    <div class="focus-side">
+      <div class="field"><label for="tTask" data-t="taskLabel">Кайсы тапшырманы аткарасың?</label><input class="input" id="tTask" maxlength="80" data-t-ph="taskPh"></div>
+      <div class="row"><button type="button" class="btn btn-ink" id="tStart">Баштоо</button><button type="button" class="btn btn-ghost" id="tReset" data-t="reset">Кайра коюу</button><button type="button" class="btn btn-ghost" id="tSwitch"></button></div>
+      <div class="sessions" id="sessions"><i></i><i></i><i></i><i></i><span data-t="sessions"></span></div>
+      <ul class="tips"><li data-t="tip1"></li><li data-t="tip2"></li><li data-t="tip3"></li></ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PROFILE ================= -->
+<section class="view" data-view="me" hidden>
+  <div class="page-head"><span class="eyebrow" data-t="meEyebrow">Профиль</span><h2 class="h1" data-t="meTitle">Сенин чокуга жолуң</h2></div>
+  <div class="me-grid">
+    <div class="panel">
+      <h3 data-t="aboutYou">Сен жөнүндө</h3>
+      <div class="form">
+        <div class="field"><label for="meName" data-t="nameLabel">Атың</label><input class="input" id="meName" maxlength="24" data-t-ph="namePh" autocomplete="nickname"></div>
+        <div class="field"><label for="meLang" data-t="langLabel">Тил</label><select class="input" id="meLang"><option value="ky">Кыргызча</option><option value="ru">Русский</option><option value="en">English</option></select></div>
+        <div class="field"><label for="meGoal" data-t="goalLabel">Күндүк максат</label><select class="input" id="meGoal"><option value="30" data-t="goal30"></option><option value="50" data-t="goal50"></option><option value="100" data-t="goal100"></option></select></div>
+        <label class="switch" for="meSound"><input type="checkbox" id="meSound"> <span data-t="sounds">Үндөр</span></label>
+      </div>
+    </div>
+    <div class="panel"><h3 data-t="statsTitle">Сенин статистикаң</h3><dl class="statlist" id="statList"></dl></div>
+  </div>
+  <div class="panel"><h3 data-t="badgesTitle">Белгилер</h3><div class="badge-grid" id="badgeGrid"></div></div>
+  <div class="panel app-only stack" id="getApp" hidden>
+    <h3 style="margin:0" data-t="getApp">Тиркемени орнот</h3>
+    <p class="muted" data-t="getAppD"></p>
+    <div><button type="button" class="btn btn-sun" id="installBtn2" hidden data-t="installBilim">Bilim'ди орнотуу</button></div>
+    <ul class="tips"><li data-t="tipAndroid"></li><li data-t="tipIphone"></li></ul>
+  </div>
+  <div class="panel stack">
+    <h3 style="margin:0" data-t="startOver">Кайра баштоо</h3>
+    <p class="muted" data-t="startOverD"></p>
+    <div><button type="button" class="btn btn-bad" id="resetBtn" data-t="resetBtn">Прогрессти өчүрүү</button></div>
+  </div>
+</section>
+
+</main>
+
+<footer class="wrap"><span data-t="foot1"></span><span data-t="foot2"></span></footer>
+
+<nav class="bottom-nav" data-t-aria="navAria">
+  <a href="#home" data-tab="home"><span class="bn-ico" data-ico="home"></span><span class="bn-label" data-t="navHome">Башкы</span></a>
+  <a href="#practice" data-tab="practice"><span class="bn-ico" data-ico="practice"></span><span class="bn-label" data-t="navPractice">Тесттер</span></a>
+  <a href="#cards" data-tab="cards"><span class="bn-ico" data-ico="cards"></span><span class="bn-label" data-t="navCardsShort">Карточка</span></a>
+  <a href="#ideas" data-tab="ideas"><span class="bn-ico" data-ico="bulb"></span><span class="bn-label" data-t="navIdeas">Идеялар</span></a>
+  <a href="#focus" data-tab="focus"><span class="bn-ico" data-ico="timer"></span><span class="bn-label" data-t="navFocus">Фокус</span></a>
+</nav>
+
+<!-- Language picker: shown on the first visit -->
+<div class="welcome" id="welcome" role="dialog" aria-modal="true" aria-labelledby="wTitle" hidden>
+  <svg class="w-stars" id="wStars" viewBox="0 0 1000 320" preserveAspectRatio="xMidYMin slice" aria-hidden="true"></svg>
+  <svg class="scene w-scene" viewBox="0 0 1000 320" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <path class="far" d="M0 232 L60 196 L110 214 L180 160 L240 200 L300 172 L360 210 L420 176 L470 204 L530 168 L600 198 L660 150 L720 190 L780 160 L860 196 L940 156 L1000 184 L1000 320 L0 320 Z"/>
+    <path class="massif" d="M470 320 L640 190 L680 205 L820 56 L900 150 L940 140 L1000 190 L1000 320 Z"/>
+    <path class="snow" d="M820 56 L857.4 100 L846 95 L836 106 L824 96 L812 105 L800 97 L788 104 L778.7 100 Z"/>
+    <path class="near" d="M0 320 L0 268 L90 252 L180 270 L270 248 L360 274 L450 258 L540 282 L640 266 L740 290 L840 272 L940 286 L1000 278 L1000 320 Z"/>
+    <line class="pole" x1="820" y1="57" x2="820" y2="28"/>
+    <path class="flag" d="M820 28 L848 35 L820 42 Z"/>
+  </svg>
+  <div class="welcome-card" tabindex="-1">
+    <svg class="w-logo" viewBox="0 0 40 40" aria-hidden="true">
+      <rect width="40" height="40" rx="11" class="lg-bg"/>
+      <path class="lg-far" d="M3 31 L13 19 L19 25 L26 14 L37 31 Z"/>
+      <path class="lg-snow" d="M26 14 L29.2 19 L27.6 18.2 L26.2 19.8 L24.6 18.3 L22.8 19 Z"/>
+      <polygon class="lg-star" points="12,6.4 12.88,8.79 15.42,8.89 13.43,10.46 14.12,12.91 12,11.5 9.88,12.91 10.57,10.46 8.58,8.89 11.12,8.79"/>
+    </svg>
+    <p class="w-brand">Bilim</p>
+    <h1 id="wTitle">Кош келиңиз!<span>Добро пожаловать! · Welcome!</span></h1>
+    <p class="w-sub">Тилди тандаңыз · Выберите язык · Choose a language</p>
+    <div class="w-langs">
+      <button type="button" class="w-lang" data-lang="ky"><span class="code">КЫР</span><b>Кыргызча</b><span class="sub">Кыргыз тили</span></button>
+      <button type="button" class="w-lang" data-lang="ru"><span class="code">РУС</span><b>Русский</b><span class="sub">Русский язык</span></button>
+      <button type="button" class="w-lang" data-lang="en"><span class="code">ENG</span><b>English</b><span class="sub">English language</span></button>
+    </div>
+    <p class="w-note">Тилди кийин профилден алмаштырсаң болот · Язык можно сменить в профиле · You can change it later in your profile</p>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<canvas id="confetti" hidden></canvas>
+
+<script>
+(function(){
+"use strict";
+var BUILD = window.BILIM_BUILD || "artifact";
+
+/* ================= Helpers ================= */
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem("bilim:" + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem("bilim:" + k, JSON.stringify(v)); } catch (e) {} }
+};
+const pad = n => String(n).padStart(2, "0");
+const dayKey = d => { d = d || new Date(); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); };
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = a[i]; a[i] = a[j]; a[j] = t; } return a; };
+const fmt = n => { n = Number(n || 0); if (LANG === "en") return n.toLocaleString("en-US"); return n >= 10000 ? n.toLocaleString("ru-RU") : String(n); };
+const mUnit = () => (LANG === "en" ? " m" : " м");
+const reduceMotion = () => !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+/* ================= Texts: ky = Kyrgyz, ru = Russian, en = English ================= */
+/* A value can be a plain string, or a list of forms for numbers: Russian [1, 2–4, 5+], English [1, more]. {name} parts are filled in by the code. */
+const STR = {
+  ky: {
+    brandSub: "Чогуу окуйбуз", navAria: "Бөлүмдөр",
+    navHome: "Башкы", navPractice: "Тесттер", navCards: "Карточкалар", navCardsShort: "Карточка", navIdeas: "Идеялар", navFocus: "Фокус",
+    xpTitle: "Бийиктигиң жана XP", profileAria: "Профилиң", langAria: "Тилди алмаштыруу", langCode: "КЫР", langToast: "Тил: кыргызча", install: "Орнотуу",
+    hiThere: "Салам", hiName: "Салам, {name}", startClimb: "Чокуга чыгууну башта", youAre: "Сен азыр: {place}", atTop: "Сен чокуга жеттиң!",
+    climbSub: "Ар бир XP — Бишкектен Жеңиш чокусуна, Кыргызстандын эң бийик чокусуна карай бир кадам.",
+    nextLvl: "{place} — дагы {n} XP", topLvl: "Кыргызстандын эң бийик чокусу", heroQuiz: "Тест баштоо", heroCards: "Карточкалар",
+    today: "Бүгүн", streakChip: "{n} күн катары менен", ringOf: "МАКСАТ {g} XP", ringAria: "Күндүк максаттын прогресси",
+    goalDone: "Максат аткарылды. Азамат!", goalLeft: "Дагы {n} XP калды", goalStart: "Баштайлыбы?",
+    goalSubDone: "Серияңды улантуу үчүн эртең кайра кел.", goalSub: "Серияң үзүлбөшү үчүн бүгүн {g} XP топто.",
+    statQuiz: "тест", statCards: "карточка", statFocus: "фокус мүнөт",
+    days: ["Жк", "Дш", "Шш", "Шр", "Бш", "Жм", "Иш"],
+    dailyTitle: "Күндүн суроосу", correct: "Туура!", wrong: "Туура эмес.", dailyNote: "Жаңы суроо эртең чыгат.", whyDaily: "күндүн суроосу", whyTry: "аракет үчүн",
+    roomsEyebrow: "Бөлүмдөр", roomsTitle: "Эмне менен алектенесиң?",
+    roomPracticeT: "Тесттер", roomPracticeD: "ЖРТ үлгүсүндөгү тесттер, ар бир жооптун түшүндүрмөсү менен.",
+    roomCardsT: "Карточкалар", roomCardsD: "Орусча жана англисче сөздөр, формулалар жана терминдер.",
+    roomIdeasT: "Идеялар тактасы", roomIdeasD: "Кантип окуганыңды бөлүш жана пайдалуу кеңештерге лайк бас.", roomIdeasM: "Ар бир идея +15 XP",
+    roomFocusT: "Фокус таймер", roomFocusD: "25 мүнөт окуу, андан кийин 5 мүнөт эс алуу.", roomFocusM: "Ар бир сессия +25 XP",
+    subjectsN: "{n} сабак", questionsN: "{n} суроо", decksN: "{n} топтом", cardsN: "{n} карточка",
+    badgesEyebrow: "Белгилер", badgesHead: "{m} белгиден {n} алынды", seeAll: "Баарын көрүү", earned: "Алынган күнү: {d}",
+    b_first: "Алгачкы кадам", b_first_d: "Биринчи тестти бүтүр",
+    b_perfect: "Мыкты раунд", b_perfect_d: "6 суроонун баарына туура жооп бер",
+    b_streak3: "Жалындуу", b_streak3_d: "3 күн катары менен оку",
+    b_streak7: "Апталык баатыр", b_streak7_d: "7 күн катары менен оку",
+    b_cards50: "Коллекционер", b_cards50_d: "50 карточка үйрөн",
+    b_focus5: "Терең фокус", b_focus5_d: "5 фокус сессиясын бүтүр",
+    b_idea: "Идея автору", b_idea_d: "Тактага идея жаз",
+    b_daily5: "Күндүн баатыры", b_daily5_d: "Күндүн 5 суроосуна жооп бер",
+    b_songkul: "Бийик көл", b_songkul_d: "Соң-Көлгө чейин көтөрүл (3016 м)",
+    b_summit: "Чоку", b_summit_d: "Жеңиш чокусуна жет (7439 м)",
+    prEyebrow: "Тесттер", prTitle: "Тез тест",
+    prLede: "Бир раундда алты суроо, ар бир туура жооп үчүн +10 XP. Каталар кайталоо тизмесине түшөт, аларды кайра чыгара аласың.",
+    prHint: "Клавиатурада: 1–4 — жооп берүү, Enter — кийинки суроо.", subjAria: "Сабактар",
+    review: "Каталарды кайталоо ({n})", reviewPrefix: "Кайталоо", qMeta: "{s} · суроо {i}/{n}", score: "Упай: {n}",
+    nextQ: "Кийинки суроо", seeResult: "Жыйынтык", whyCorrect: "туура жооп", roundDone: "{s} · раунд бүттү",
+    msgPerfect: "Мыкты раунд! Сонун.", msgGood: "Азамат! Жогору карай уланта бер.", msgMid: "Жакшы аракет. Каталарды кайталап, кайра аракет кыл.", msgLow: "Ар бир ката — сабак. Каталарды кайталап көр.",
+    roundXp: "Раунд үчүн +{n} XP", again: "Дагы бир жолу", noMistakes: "Кайталай турган ката жок. Азамат!",
+    cdEyebrow: "Карточкалар", cdTitle: "Карточканы бур жана эсте",
+    cdLede: "Жоопту көрүү үчүн карточканы бас, анан «Билем» же «Дагы бир жолу» дегенди танда. Ар бир үйрөнгөн карточка +2 XP.",
+    cdHint: "Клавиатурада: боштук — карточканы буруу, → — «Билем», ← — «Дагы бир жолу».", decksAria: "Топтомдор",
+    knew: "Билем", cardAgain: "Дагы бир жолу", restartDeck: "Кайра баштоо", tapFlip: "Буруу үчүн бас", flipAria: "Карточканы буруу",
+    deckDone: "Топтом бүттү!", deckDoneBack: "«Кайра баштоо» баскычын бас", cardsLeft: "Калды: {n} · билем: {k}", cardsLearned: "{t} карточкадан {k} үйрөнүлдү", whyCard: "карточка үйрөнүлдү",
+    idEyebrow: "Идеялар тактасы", idTitle: "Сен кантип окуйсуң?",
+    idLede: "Окууга жардам берген кеңешиңди, ыкмаңды же идеяңды бөлүш. Сылык жаз жана окуу жөнүндө гана жаз.",
+    idLabel: "Сенин идеяң", idPh: "Мисалы: мен математиканын ар бир темасын иниме түшүндүрөм. Ал түшүнсө, демек мен теманы чындап билем.",
+    idSubjAria: "Сабак", idShare: "Бөлүшүү", sortAria: "Иреттөө", sortNew: "Адегенде жаңылары", sortTop: "Эң көп жаккандар", filterAria: "Сабак боюнча тандоо", all: "Баары",
+    postAsClaude: "claude.ai'дагы атың менен жарыяланат", postAs: "{name} катары жазып жатасың", postLocal: " · ушул түзмөктө сакталат", anon: "Окуучу", you: "Сен",
+    loading: "Идеялар жүктөлүүдө…", slow: "Идеялар узак жүктөлүп жатат. Интернетти текшер.", noConnect: "Идеялар тактасына туташуу болбоду. Баракты жаңырт.",
+    signedOut: "Идеяларды көрүү жана бөлүшүү үчүн claude.ai'га кир.", signedOutNote: "Идея бөлүшүү үчүн аккаунтка кириш керек.",
+    fallback: "Жалпы тактага туташуу болбоду, ошондуктан идеялар азырынча ушул түзмөктө сакталат.",
+    emptyAll: "Азырынча идея жок. Биринчи болуп бөлүш!", emptySubj: "«{s}» бөлүмүндө азырынча идея жок. Биринчи болуп жаз!",
+    writeMore: "Бир аз кененирээк жаз", waitPost: "Кийинки жарыяга чейин бир аз күт", notReady: "Идеялар тактасы даяр эмес. Бир аздан кийин кайра аракет кыл.",
+    postFailClaude: "Идея жарыяланган жок. Эгер бул баракты сага бирөө жөнөтсө, жазуу кошууга уруксат сура.", postFailNet: "Идея жарыяланган жок. Интернетти текшерип, кайра аракет кыл.",
+    whyIdea: "идея жарыяланды", likeAria: "Жакты", unlikeAria: "Лайкты алып салуу", signInLike: "Лайк басуу үчүн аккаунтка кир", likeFail: "Лайк сакталган жок. Кайра аракет кыл.",
+    del: "Өчүрүү", delConfirm: "Дагы бир жолу бас", deleted: "Идея өчүрүлдү", delFail: "Өчүрүү болбоду. Кайра аракет кыл.",
+    agoNow: "азыр эле", agoMin: "{n} мүн. мурун", agoHr: "{n} саат мурун", agoDay: "{n} күн мурун",
+    fcEyebrow: "Фокус", fcTitle: "Бир тапшырма, 25 мүнөт", fcLede: "Телефонуңду алыс кой, бир тапшырма танда да, «Баштоо» баскычын бас. Ар бир бүткөн сессия +25 XP.",
+    taskLabel: "Кайсы тапшырманы аткарасың?", taskPh: "Мисалы: алгебрадан 10 маселе", timerAria: "Таймер",
+    start: "Баштоо", pause: "Пауза", resume: "Улантуу", reset: "Кайра коюу", toBreak: "Эс алууга өтүү", toFocus: "Фокуска өтүү",
+    modeFocus: "ФОКУС", modeBreak: "ЭС АЛУУ", sessions: "4 сессия, андан кийин узун эс алуу",
+    tip1: "Ашыкча өтмөктөрдү жап, телефонуңдун үнүн өчүр.", tip2: "4 сессиядан кийин 15–20 мүнөт эс ал.", tip3: "Ар бир тыныгууда суу ич жана бир аз кыймылда.",
+    whyFocus: "фокус сессиясы", fourDone: "4 сессия бүттү! Узунураак эс ал.", breakOver: "Эс алуу бүттү. Улантабызбы?",
+    meEyebrow: "Профиль", meTitle: "Сенин чокуга жолуң", aboutYou: "Сен жөнүндө", nameLabel: "Атың", namePh: "Мисалы: Айбек", langLabel: "Тил",
+    goalLabel: "Күндүк максат", goal30: "Күнүнө 30 XP (жеңил)", goal50: "Күнүнө 50 XP (орточо)", goal100: "Күнүнө 100 XP (олуттуу)", sounds: "Үндөр",
+    statsTitle: "Сенин статистикаң", st_xp: "Жалпы XP", st_alt: "Бийиктик", st_best: "Эң узун серия", st_quiz: "Тесттер", st_perfect: "Мыкты раунддар",
+    st_cards: "Үйрөнүлгөн карточкалар", st_focus: "Фокус мүнөттөрү", st_ideas: "Бөлүшүлгөн идеялар", bestDays: "{n} күн", badgesTitle: "Белгилер",
+    getApp: "Тиркемени орнот", getAppD: "Bilim'ди телефонуңа орнот. Ал кадимки тиркемедей толук экранда ачылат жана интернетсиз да иштейт.", installBilim: "Bilim'ди орнотуу",
+    tipAndroid: "Android: Chrome'до ⋮ менюну ачып, «Установить приложение» (Install app) дегенди бас.",
+    tipIphone: "iPhone: Safari'де «Поделиться» (Share), андан кийин «На экран „Домой“» (Add to Home Screen) дегенди бас.",
+    startOver: "Кайра баштоо", startOverD: "Ушул түзмөктөгү XP, серия жана белгилериң өчөт. Атың жана жөндөөлөрүң калат.",
+    resetBtn: "Прогрессти өчүрүү", resetConfirm: "Баарын өчүрүү үчүн дагы бир жолу бас", resetDone: "Прогресс өчүрүлдү. Жаңыдан баштайбыз!",
+    foot1: "Bilim — кыргызча «билим».", foot2: "XP, серия жана белгилериң ушул түзмөктө сакталат.",
+    levelUp: "Жаңы деңгээл: {place}, {alt} м", goalToast: "Күндүк максат аткарылды! Серияң өсүүдө.", badgeToast: "Жаңы белги: {name}", xpToast: "+{n} XP · {why}",
+    themeSystem: "түзмөккө жараша", themeLight: "жарык", themeDark: "караңгы", themeAria: "Тема: {t}. Алмаштыруу үчүн бас.",
+    themeToastSystem: "Тема түзмөккө жараша", themeToastLight: "Жарык тема", themeToastDark: "Караңгы тема",
+    installMenu: "Браузердин менюсу аркылуу орнот", installed: "Bilim орнотулду. Аны башкы экрандан тап!"
+  },
+  ru: {
+    brandSub: "Учимся вместе", navAria: "Разделы",
+    navHome: "Главная", navPractice: "Тесты", navCards: "Карточки", navCardsShort: "Карточки", navIdeas: "Идеи", navFocus: "Фокус",
+    xpTitle: "Твоя высота и XP", profileAria: "Твой профиль", langAria: "Сменить язык", langCode: "РУС", langToast: "Язык: русский", install: "Установить",
+    hiThere: "Привет", hiName: "Привет, {name}", startClimb: "Начни восхождение", youAre: "Ты здесь: {place}", atTop: "Ты на вершине!",
+    climbSub: "Каждый XP — шаг вверх: от Бишкека до пика Победы, самой высокой вершины Кыргызстана.",
+    nextLvl: "{place} — через {n} XP", topLvl: "Самая высокая вершина Кыргызстана", heroQuiz: "Начать тест", heroCards: "Карточки",
+    today: "Сегодня", streakChip: ["{n} день подряд", "{n} дня подряд", "{n} дней подряд"], ringOf: "ИЗ {g} XP", ringAria: "Прогресс цели на день",
+    goalDone: "Цель выполнена. Молодец!", goalLeft: "Осталось {n} XP", goalStart: "Начнём?",
+    goalSubDone: "Возвращайся завтра, чтобы продолжить серию.", goalSub: "Набери {g} XP сегодня, чтобы не прервать серию.",
+    statQuiz: "тестов", statCards: "карточек", statFocus: "мин фокуса",
+    days: ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"],
+    dailyTitle: "Вопрос дня", correct: "Верно!", wrong: "Не совсем.", dailyNote: "Новый вопрос появится завтра.", whyDaily: "вопрос дня", whyTry: "за попытку",
+    roomsEyebrow: "Разделы", roomsTitle: "Выбери, чем заняться",
+    roomPracticeT: "Тесты", roomPracticeD: "Тесты в стиле ОРТ с объяснением каждого ответа.",
+    roomCardsT: "Карточки", roomCardsD: "Кыргызские и английские слова, формулы и термины.",
+    roomIdeasT: "Доска идей", roomIdeasD: "Делись, как ты учишься, и отмечай полезные советы.", roomIdeasM: "+15 XP за идею",
+    roomFocusT: "Фокус-таймер", roomFocusD: "25 минут учёбы, потом 5 минут отдыха.", roomFocusM: "+25 XP за сессию",
+    subjectsN: ["{n} предмет", "{n} предмета", "{n} предметов"], questionsN: ["{n} вопрос", "{n} вопроса", "{n} вопросов"],
+    decksN: ["{n} колода", "{n} колоды", "{n} колод"], cardsN: ["{n} карточка", "{n} карточки", "{n} карточек"],
+    badgesEyebrow: "Значки", badgesHead: "Получено {n} из {m}", seeAll: "Все значки", earned: "Получен {d}",
+    b_first: "Первые шаги", b_first_d: "Пройди первый тест",
+    b_perfect: "Идеально", b_perfect_d: "Ответь верно на 6 вопросов из 6",
+    b_streak3: "В ударе", b_streak3_d: "Занимайся 3 дня подряд",
+    b_streak7: "Неделя без пропусков", b_streak7_d: "Занимайся 7 дней подряд",
+    b_cards50: "Коллекционер", b_cards50_d: "Выучи 50 карточек",
+    b_focus5: "Полный фокус", b_focus5_d: "Заверши 5 фокус-сессий",
+    b_idea: "Автор идей", b_idea_d: "Поделись идеей на доске",
+    b_daily5: "Герой дня", b_daily5_d: "Ответь на 5 вопросов дня",
+    b_songkul: "Высокое озеро", b_songkul_d: "Поднимись до Сон-Куля (3016 м)",
+    b_summit: "Вершина", b_summit_d: "Дойди до пика Победы (7439 м)",
+    prEyebrow: "Тесты", prTitle: "Быстрый тест",
+    prLede: "Шесть вопросов за раунд и +10 XP за каждый верный ответ. Ошибки попадают в «Работу над ошибками», чтобы их можно было решить снова.",
+    prHint: "На клавиатуре: 1–4 — ответить, Enter — следующий вопрос.", subjAria: "Предметы",
+    review: "Работа над ошибками ({n})", reviewPrefix: "Повторение", qMeta: "{s} · вопрос {i}/{n}", score: "Счёт: {n}",
+    nextQ: "Следующий вопрос", seeResult: "Результат", whyCorrect: "верный ответ", roundDone: "{s} · раунд окончен",
+    msgPerfect: "Идеальный раунд! Потрясающе.", msgGood: "Отлично. Поднимайся выше.", msgMid: "Хорошая попытка. Повтори ошибки и попробуй снова.", msgLow: "Каждая ошибка — это урок. Попробуй работу над ошибками.",
+    roundXp: "+{n} XP за раунд", again: "Ещё раз", noMistakes: "Ошибок для повторения нет. Отлично!",
+    cdEyebrow: "Карточки", cdTitle: "Переверни и запомни",
+    cdLede: "Нажми на карточку, чтобы увидеть ответ, потом выбери «Знаю» или «Ещё раз». Каждая выученная карточка — +2 XP.",
+    cdHint: "На клавиатуре: пробел переворачивает карточку, → — «Знаю», ← — «Ещё раз».", decksAria: "Колоды",
+    knew: "Знаю", cardAgain: "Ещё раз", restartDeck: "Начать заново", tapFlip: "Нажми, чтобы перевернуть", flipAria: "Перевернуть карточку",
+    deckDone: "Колода пройдена!", deckDoneBack: "Нажми «Начать заново»", cardsLeft: "Осталось: {n} · знаю: {k}", cardsLearned: "Выучено {k} из {t}", whyCard: "карточка выучена",
+    idEyebrow: "Доска идей", idTitle: "Как ты учишься?",
+    idLede: "Поделись советом, приёмом или идеей, которая помогает учиться. Пиши вежливо и только про учёбу.",
+    idLabel: "Твоя идея", idPh: "Например: я объясняю каждую тему по математике младшему брату. Если он понял, значит, я и правда знаю тему.",
+    idSubjAria: "Предмет", idShare: "Поделиться", sortAria: "Сортировка", sortNew: "Сначала новые", sortTop: "Самые популярные", filterAria: "Фильтр по предмету", all: "Все",
+    postAsClaude: "Публикуется с твоим именем в claude.ai", postAs: "Ты пишешь как {name}", postLocal: " · сохраняется на этом устройстве", anon: "Ученик", you: "Ты",
+    loading: "Загружаем идеи…", slow: "Идеи долго загружаются. Проверь интернет.", noConnect: "Не удалось подключиться к доске идей. Обнови страницу.",
+    signedOut: "Войди в claude.ai, чтобы видеть идеи и делиться ими.", signedOutNote: "Чтобы делиться идеями, нужно войти в аккаунт.",
+    fallback: "Общая доска недоступна, поэтому идеи пока сохраняются на этом устройстве.",
+    emptyAll: "Идей пока нет. Поделись первой!", emptySubj: "В разделе «{s}» идей пока нет. Будь первым!",
+    writeMore: "Напиши чуть подробнее", waitPost: "Подожди немного перед следующей публикацией", notReady: "Доска идей ещё не готова. Попробуй через минуту.",
+    postFailClaude: "Идею не удалось опубликовать. Если тебе прислали эту страницу, попроси доступ, который позволяет добавлять записи.", postFailNet: "Идею не удалось опубликовать. Проверь интернет и попробуй ещё раз.",
+    whyIdea: "идея опубликована", likeAria: "Нравится", unlikeAria: "Убрать лайк", signInLike: "Войди, чтобы ставить лайки", likeFail: "Лайк не сохранился. Попробуй ещё раз.",
+    del: "Удалить", delConfirm: "Нажми ещё раз", deleted: "Идея удалена", delFail: "Не удалось удалить. Попробуй ещё раз.",
+    agoNow: "только что", agoMin: "{n} мин назад", agoHr: "{n} ч назад", agoDay: "{n} дн. назад",
+    fcEyebrow: "Фокус", fcTitle: "Одна задача, 25 минут", fcLede: "Убери телефон, выбери одну задачу и нажми «Старт». Каждая завершённая сессия — +25 XP.",
+    taskLabel: "Над чем будешь работать?", taskPh: "Например: 10 задач по алгебре", timerAria: "Таймер",
+    start: "Старт", pause: "Пауза", resume: "Продолжить", reset: "Сброс", toBreak: "Перейти к перерыву", toFocus: "Перейти к фокусу",
+    modeFocus: "ФОКУС", modeBreak: "ПЕРЕРЫВ", sessions: "4 сессии, потом длинный перерыв",
+    tip1: "Закрой лишние вкладки и выключи звук на телефоне.", tip2: "После 4 сессий отдохни 15–20 минут.", tip3: "На каждом перерыве пей воду и немного разминайся.",
+    whyFocus: "фокус-сессия", fourDone: "4 сессии позади! Сделай длинный перерыв.", breakOver: "Перерыв окончен. Продолжаем?",
+    meEyebrow: "Профиль", meTitle: "Твоё восхождение", aboutYou: "О тебе", nameLabel: "Твоё имя", namePh: "Например: Айбек", langLabel: "Язык",
+    goalLabel: "Цель на день", goal30: "30 XP в день (легко)", goal50: "50 XP в день (стабильно)", goal100: "100 XP в день (серьёзно)", sounds: "Звуки",
+    statsTitle: "Твоя статистика", st_xp: "Всего XP", st_alt: "Высота", st_best: "Лучшая серия", st_quiz: "Тестов", st_perfect: "Идеальных раундов",
+    st_cards: "Выучено карточек", st_focus: "Минут фокуса", st_ideas: "Идей опубликовано", bestDays: ["{n} день", "{n} дня", "{n} дней"], badgesTitle: "Значки",
+    getApp: "Установи приложение", getAppD: "Установи Bilim на телефон. Он откроется на весь экран, как обычное приложение, и будет работать без интернета.", installBilim: "Установить Bilim",
+    tipAndroid: "Android: открой меню ⋮ в Chrome и нажми «Установить приложение».",
+    tipIphone: "iPhone: в Safari нажми «Поделиться», затем «На экран „Домой“».",
+    startOver: "Начать заново", startOverD: "Сотрёт твои XP, серию и значки на этом устройстве. Имя и настройки останутся.",
+    resetBtn: "Сбросить прогресс", resetConfirm: "Нажми ещё раз, чтобы всё стереть", resetDone: "Прогресс сброшен. Начинаем сначала!",
+    foot1: "Bilim — по-кыргызски «знание».", foot2: "Твои XP, серия и значки хранятся на этом устройстве.",
+    levelUp: "Новый уровень: {place}, {alt} м", goalToast: "Цель дня выполнена! Серия растёт.", badgeToast: "Новый значок: {name}", xpToast: "+{n} XP · {why}",
+    themeSystem: "как на устройстве", themeLight: "светлая", themeDark: "тёмная", themeAria: "Тема: {t}. Нажми, чтобы сменить.",
+    themeToastSystem: "Тема как на устройстве", themeToastLight: "Светлая тема", themeToastDark: "Тёмная тема",
+    installMenu: "Установи через меню браузера", installed: "Bilim установлен. Ищи его на главном экране!"
+  },
+  en: {
+    brandSub: "Study together", navAria: "Sections",
+    navHome: "Home", navPractice: "Practice", navCards: "Flashcards", navCardsShort: "Cards", navIdeas: "Ideas", navFocus: "Focus",
+    xpTitle: "Your altitude and study points", profileAria: "Your profile", langAria: "Change language", langCode: "ENG", langToast: "Language: English", install: "Install app",
+    hiThere: "Hi there", hiName: "Hi, {name}", startClimb: "Start your climb", youAre: "You're at {place}", atTop: "You made it to the top!",
+    climbSub: "Every XP you earn is a step from Bishkek up to Jengish Chokusu, the highest peak in Kyrgyzstan.",
+    nextLvl: "{n} XP to {place}", topLvl: "Highest peak in Kyrgyzstan", heroQuiz: "Start a quiz", heroCards: "Flashcards",
+    today: "Today", streakChip: "{n} day streak", ringOf: "OF {g} XP", ringAria: "Daily goal progress",
+    goalDone: "Goal done. Great work!", goalLeft: "{n} XP to go", goalStart: "Ready when you are",
+    goalSubDone: "Come back tomorrow to keep your streak.", goalSub: "Earn {g} XP today to keep your streak going.",
+    statQuiz: "quizzes", statCards: "cards", statFocus: "focus min",
+    days: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+    dailyTitle: "Question of the day", correct: "Correct!", wrong: "Not quite.", dailyNote: "A new question comes tomorrow.", whyDaily: "question of the day", whyTry: "for trying",
+    roomsEyebrow: "Study rooms", roomsTitle: "Pick a place to study",
+    roomPracticeT: "Practice", roomPracticeD: "ORT-style quizzes with an explanation for every answer.",
+    roomCardsT: "Flashcards", roomCardsD: "Kyrgyz and English words, formulas and science terms.",
+    roomIdeasT: "Ideas board", roomIdeasD: "Share how you study and like the tips that help you.", roomIdeasM: "+15 XP an idea",
+    roomFocusT: "Focus timer", roomFocusD: "25 minutes of study, then a 5 minute break.", roomFocusM: "+25 XP a session",
+    subjectsN: ["{n} subject", "{n} subjects"], questionsN: ["{n} question", "{n} questions"],
+    decksN: ["{n} deck", "{n} decks"], cardsN: ["{n} card", "{n} cards"],
+    badgesEyebrow: "Badges", badgesHead: "{n} of {m} earned", seeAll: "See all", earned: "Earned {d}",
+    b_first: "First steps", b_first_d: "Finish your first quiz",
+    b_perfect: "Perfect round", b_perfect_d: "Get 6 out of 6 in a quiz",
+    b_streak3: "On fire", b_streak3_d: "Reach a 3-day streak",
+    b_streak7: "Week warrior", b_streak7_d: "Reach a 7-day streak",
+    b_cards50: "Card collector", b_cards50_d: "Learn 50 flashcards",
+    b_focus5: "Deep focus", b_focus5_d: "Finish 5 focus sessions",
+    b_idea: "Idea maker", b_idea_d: "Share an idea on the board",
+    b_daily5: "Daily hero", b_daily5_d: "Answer 5 questions of the day",
+    b_songkul: "High lake", b_songkul_d: "Climb to Song-Kul (3,016 m)",
+    b_summit: "Summit", b_summit_d: "Reach Jengish Chokusu (7,439 m)",
+    prEyebrow: "Practice", prTitle: "Quick quiz",
+    prLede: "Six questions a round and +10 XP for every right answer. Wrong answers go to your review list so you can try them again.",
+    prHint: "On a keyboard: press 1 to 4 to answer and Enter for the next question.", subjAria: "Subjects",
+    review: "Review mistakes ({n})", reviewPrefix: "Review", qMeta: "{s} · question {i} of {n}", score: "Score {n}",
+    nextQ: "Next question", seeResult: "See result", whyCorrect: "correct answer", roundDone: "{s} · round done",
+    msgPerfect: "Perfect round! Amazing.", msgGood: "Strong work. Keep climbing.", msgMid: "Good effort. Review your mistakes and try again.", msgLow: "Every mistake is a lesson. Try your review list.",
+    roundXp: "+{n} XP this round", again: "Play again", noMistakes: "No mistakes to review. Nice!",
+    cdEyebrow: "Flashcards", cdTitle: "Flip and remember",
+    cdLede: "Tap the card to see the answer, then choose “I knew it” or “Again”. Every card you know is +2 XP.",
+    cdHint: "On a keyboard: Space flips the card, → means “I knew it”, ← means “Again”.", decksAria: "Decks",
+    knew: "I knew it", cardAgain: "Again", restartDeck: "Restart deck", tapFlip: "Tap to flip", flipAria: "Flip card",
+    deckDone: "Deck done!", deckDoneBack: "Tap “Restart deck” to go again", cardsLeft: "{n} left · {k} known", cardsLearned: "{k} of {t} learned", whyCard: "card learned",
+    idEyebrow: "Ideas board", idTitle: "How do you study?",
+    idLede: "Share one tip, trick or idea that helps you learn. Be kind and keep it about studying.",
+    idLabel: "Your idea", idPh: "Example: I explain each math topic to my little brother. If he understands it, I really know it.",
+    idSubjAria: "Subject", idShare: "Share idea", sortAria: "Sort ideas", sortNew: "Newest", sortTop: "Most liked", filterAria: "Filter by subject", all: "All",
+    postAsClaude: "Posting with your claude.ai name", postAs: "Posting as {name}", postLocal: " · saved on this device", anon: "A student", you: "You",
+    loading: "Loading ideas…", slow: "Ideas are taking a while to load. Check your internet connection.", noConnect: "The ideas board couldn't connect. Try reloading the page.",
+    signedOut: "Sign in to claude.ai to see and share ideas.", signedOutNote: "Sharing ideas needs a signed-in account.",
+    fallback: "Couldn't reach the shared board, so ideas are saved on this device for now.",
+    emptyAll: "No ideas yet. Share the first one above!", emptySubj: "No {s} ideas yet. Share the first one!",
+    writeMore: "Write a bit more first", waitPost: "Wait a few seconds before posting again", notReady: "The ideas board isn't ready yet. Try again in a moment.",
+    postFailClaude: "Your idea couldn't be posted. If someone shared this page with you, ask them for access that lets you add things.", postFailNet: "Your idea couldn't be posted. Check your internet connection and try again.",
+    whyIdea: "idea shared", likeAria: "Like this idea", unlikeAria: "Unlike this idea", signInLike: "Sign in to like ideas", likeFail: "Couldn't save your like. Try again.",
+    del: "Delete", delConfirm: "Tap again to delete", deleted: "Idea deleted", delFail: "Couldn't delete it. Try again.",
+    agoNow: "just now", agoMin: "{n} min ago", agoHr: "{n} h ago", agoDay: "{n} d ago",
+    fcEyebrow: "Focus", fcTitle: "One task, 25 minutes", fcLede: "Put your phone away, pick one task and press Start. Every finished session is +25 XP.",
+    taskLabel: "What will you work on?", taskPh: "For example: 10 algebra problems", timerAria: "Focus timer",
+    start: "Start", pause: "Pause", resume: "Resume", reset: "Reset", toBreak: "Switch to break", toFocus: "Switch to focus",
+    modeFocus: "FOCUS", modeBreak: "BREAK", sessions: "4 sessions, then a long break",
+    tip1: "Close other tabs and silence your phone.", tip2: "After 4 sessions, rest for 15 to 20 minutes.", tip3: "Drink water and stretch on every break.",
+    whyFocus: "focus session", fourDone: "4 sessions done! Take a longer break.", breakOver: "Break is over. Ready for the next one?",
+    meEyebrow: "Profile", meTitle: "Your climb", aboutYou: "About you", nameLabel: "Your name", namePh: "For example: Aibek", langLabel: "Language",
+    goalLabel: "Daily goal", goal30: "30 XP a day (easy)", goal50: "50 XP a day (steady)", goal100: "100 XP a day (serious)", sounds: "Sounds",
+    statsTitle: "Your stats", st_xp: "Total XP", st_alt: "Altitude", st_best: "Best streak", st_quiz: "Quizzes", st_perfect: "Perfect rounds",
+    st_cards: "Cards learned", st_focus: "Focus minutes", st_ideas: "Ideas shared", bestDays: ["{n} day", "{n} days"], badgesTitle: "Badges",
+    getApp: "Get the app", getAppD: "Install Bilim on your phone. It opens full screen like a normal app and works without internet.", installBilim: "Install Bilim",
+    tipAndroid: "Android: open the ⋮ menu in Chrome and tap “Install app”.",
+    tipIphone: "iPhone: tap the Share button in Safari, then “Add to Home Screen”.",
+    startOver: "Start over", startOverD: "Erase your XP, streak and badges on this device. Your name and settings stay.",
+    resetBtn: "Reset progress", resetConfirm: "Tap again to erase everything", resetDone: "Progress reset. Fresh start!",
+    foot1: "Bilim means “knowledge” in Kyrgyz.", foot2: "Your XP, streak and badges are saved on this device.",
+    levelUp: "New level: {place}, {alt} m", goalToast: "Daily goal done! Your streak grows.", badgeToast: "Badge unlocked: {name}", xpToast: "+{n} XP · {why}",
+    themeSystem: "same as device", themeLight: "light", themeDark: "dark", themeAria: "Theme: {t}. Tap to change.",
+    themeToastSystem: "Theme follows your device", themeToastLight: "Light theme", themeToastDark: "Dark theme",
+    installMenu: "Use your browser menu to install", installed: "Bilim is installed. Find it on your home screen!"
+  }
+};
+const SUBJ_NAMES = {
+  General: { ky: "Жалпы", ru: "Общее", en: "General" },
+  Math: { ky: "Математика", ru: "Математика", en: "Math" },
+  History: { ky: "Тарых", ru: "История", en: "History" },
+  Geography: { ky: "География", ru: "География", en: "Geography" },
+  English: { ky: "Англис тили", ru: "Английский", en: "English" },
+  Science: { ky: "Табигый илимдер", ru: "Естествознание", en: "Science" },
+  Kyrgyz: { ky: "Кыргыз тили", ru: "Кыргызский язык", en: "Kyrgyz" },
+  Russian: { ky: "Орус тили", ru: "Русский язык", en: "Russian" },
+  ORT: { ky: "ЖРТ", ru: "ОРТ", en: "ORT" }
+};
+const LANGS = ["ky", "ru", "en"];
+Object.keys(SUBJ_NAMES).forEach(k => { LANGS.forEach(l => { STR[l]["subj_" + k] = SUBJ_NAMES[k][l]; }); });
+
+let LANG = LS.get("lang", null);
+const chosenLang = !!(LANG && STR[LANG]);
+if (!chosenLang) { const nl = (navigator.language || "").toLowerCase(); LANG = nl.indexOf("ru") === 0 ? "ru" : nl.indexOf("en") === 0 ? "en" : "ky"; }
+function fill(s, v) { return v ? String(s).replace(/\{(\w+)\}/g, (m, x) => (v[x] != null ? v[x] : m)) : s; }
+function plural(n, forms) { if (forms.length === 2) return n === 1 ? forms[0] : forms[1]; const a = Math.abs(n) % 100, b = a % 10; if (a > 10 && a < 20) return forms[2]; if (b === 1) return forms[0]; if (b > 1 && b < 5) return forms[1]; return forms[2]; }
+function t(k, v) { let s = STR[LANG][k]; if (s == null) s = STR.ru[k]; if (s == null) return k; if (Array.isArray(s)) s = s[s.length - 1]; return fill(s, v); }
+function tn(k, n, v) { let s = STR[LANG][k]; if (s == null) s = STR.ru[k]; if (s == null) return String(n); if (Array.isArray(s)) s = plural(n, s); return fill(s, Object.assign({ n: n }, v || {})); }
+const subjName = k => t("subj_" + k);
+
+/* ================= Icons ================= */
+const ICON = {
+  home: '<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  practice: '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.4 2.4c-.6.3-1 .8-1 1.5v.5"/><path d="M12 16.8h.01"/>',
+  cards: '<rect x="3" y="7" width="13" height="14" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v12"/>',
+  bulb: '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.9.7 1.6 1.7 1.6 2.9V17h4v-.3c0-1.2.7-2.2 1.6-2.9A6 6 0 0 0 12 3z"/>',
+  timer: '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/>',
+  flame: '<path d="M12 21c-3.9 0-7-2.7-7-6.4 0-3.1 2.1-5 3.5-6.8.4 1.9 1.5 3.1 2.7 3.5C11 7.7 12.5 5.1 15 3.4c-.2 2.5.8 4.3 2.1 5.8 1.3 1.4 1.9 3 1.9 5.4 0 3.7-3.1 6.4-7 6.4z"/>',
+  star: '<path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/>',
+  flag: '<path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  mount: '<path d="M2 20 9 8l4 6 3-4 6 10z"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
+  contrast: '<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"/>',
+  heart: '<path d="M12 20.3 4.7 13.2a4.7 4.7 0 0 1 7.3-5.9 4.7 4.7 0 0 1 7.3 5.9z"/>'
+};
+const ico = (k, s) => { s = s || 22; return '<svg viewBox="0 0 24 24" width="' + s + '" height="' + s + '" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICON[k] || "") + "</svg>"; };
+function paintIcons(root) { $$("[data-ico]", root).forEach(el => { el.innerHTML = ico(el.dataset.ico, +(el.dataset.size || 22)); }); }
+
+/* ================= Content ================= */
+/* Levels: altitude in meters. You climb by earning XP. */
+const LEVELS = [
+  { alt: 800, xp: 0, ky: "Бишкек", ru: "Бишкек", en: "Bishkek" },
+  { alt: 1607, xp: 100, ky: "Ысык-Көл", ru: "Иссык-Куль", en: "Issyk-Kul" },
+  { alt: 3016, xp: 250, ky: "Соң-Көл", ru: "Сон-Куль", en: "Song-Kul" },
+  { alt: 3530, xp: 500, ky: "Чатыр-Көл", ru: "Чатыр-Куль", en: "Chatyr-Kul" },
+  { alt: 7010, xp: 1000, ky: "Хан-Теңири", ru: "Хан-Тенгри", en: "Khan Tengri" },
+  { alt: 7134, xp: 1750, ky: "Ленин чокусу", ru: "Пик Ленина", en: "Lenin Peak" },
+  { alt: 7439, xp: 2500, ky: "Жеңиш чокусу", ru: "Пик Победы", en: "Jengish Chokusu" }
+];
+const lvName = L => L[LANG] || L.ru;
+
+/* Quiz questions.
+   a = the right answer (0 = A, 1 = B, 2 = C, 3 = D)
+   o = answer options (when they are the same in both languages)
+   ky / ru / en = [question, explanation, options in that language (optional)]
+   q = question that is the same in both languages (English tests) */
+const QUIZ = {
+  Math: { q: [
+    { a: 0, o: ["36", "24", "30", "40"],
+      ky: ["240 санынын 15 пайызы канча?", "240тын 10 пайызы — 24, 5 пайызы — 12. 24 + 12 = 36."],
+      ru: ["Сколько будет 15% от 240?", "10% от 240 — это 24, а 5% — это 12. 24 + 12 = 36."],
+      en: ["What is 15% of 240?", "10% of 240 is 24 and 5% is 12. 24 + 12 = 36."] },
+    { a: 1, o: ["x = 4", "x = 6", "x = 5", "x = 18"],
+      ky: ["Теңдемени чыгар: 3x − 7 = 11", "Эки жагына тең 7ни кош: 3x = 18. 3кө бөл: x = 6."],
+      ru: ["Реши уравнение: 3x − 7 = 11", "Прибавь 7 к обеим частям: 3x = 18. Раздели на 3: x = 6."],
+      en: ["Solve: 3x − 7 = 11", "Add 7 to both sides: 3x = 18. Divide by 3: x = 6."] },
+    { a: 2, o: ["108", "72", "162", "148"],
+      ky: ["Кийинки сан кайсы? 2, 6, 18, 54, …", "Ар бир сан 3кө көбөйтүлөт. 54 × 3 = 162."],
+      ru: ["Какое число следующее? 2, 6, 18, 54, …", "Каждое число умножается на 3. 54 × 3 = 162."],
+      en: ["What comes next? 2, 6, 18, 54, …", "Each number is multiplied by 3. 54 × 3 = 162."] },
+    { a: 1, o: ["120 км", "150 км", "140 км", "160 км"],
+      ky: ["Автобус 60 км/саат ылдамдык менен 2,5 саат жүрдү. Ал канча жол басты?", "Аралык = ылдамдык × убакыт = 60 × 2,5 = 150 км."],
+      ru: ["Автобус едет 2,5 часа со скоростью 60 км/ч. Какое расстояние он проедет?", "Расстояние = скорость × время = 60 × 2,5 = 150 км."],
+      en: ["A bus drives at 60 km/h for 2.5 hours. How far does it go?", "Distance = speed × time = 60 × 2.5 = 150 km.", ["120 km", "150 km", "140 km", "160 km"]] },
+    { a: 1, o: ["6π", "9π", "3π", "12π"],
+      ky: ["Радиусу 3 болгон тегеректин аянты канча?", "Аянт = πr² = π × 3² = 9π."],
+      ru: ["Чему равна площадь круга радиусом 3?", "Площадь = πr² = π × 3² = 9π."],
+      en: ["What is the area of a circle with radius 3?", "Area = πr² = π × 3² = 9π."] },
+    { a: 2, o: ["16", "20", "24", "30"],
+      ky: ["a : b = 2 : 3 жана a + b = 40. b канчага барабар?", "Баары 2 + 3 = 5 бөлүк, бир бөлүгү — 8. b = 3 × 8 = 24."],
+      ru: ["a : b = 2 : 3, а a + b = 40. Чему равно b?", "Всего 2 + 3 = 5 частей, одна часть — 8. b = 3 × 8 = 24."],
+      en: ["a : b = 2 : 3 and a + b = 40. What is b?", "There are 2 + 3 = 5 parts, so one part is 8. b = 3 × 8 = 24."] },
+    { a: 0, o: ["600 сом", "575 сом", "625 сом", "200 сом"],
+      ky: ["Куртканын баасы 800 сом. Ага 25% арзандатуу бар. Жаңы баасы канча?", "800дүн 25 пайызы — 200. 800 − 200 = 600 сом."],
+      ru: ["Куртка стоит 800 сомов. На неё скидка 25%. Какая новая цена?", "25% от 800 — это 200. 800 − 200 = 600 сомов."],
+      en: ["A jacket costs 800 som. It is 25% off. What is the new price?", "25% of 800 is 200. 800 − 200 = 600 som.", ["600 som", "575 som", "625 som", "200 som"]] },
+    { a: 1, o: ["12", "12,5", "13", "50"],
+      ky: ["4, 8, 15 жана 23 сандарынын орточо арифметикалыгын тап.", "Суммасы: 4 + 8 + 15 + 23 = 50. Аны 4кө бөлөбүз: 50 : 4 = 12,5."],
+      ru: ["Найди среднее арифметическое чисел 4, 8, 15 и 23.", "Сумма: 4 + 8 + 15 + 23 = 50. Делим на 4: 50 : 4 = 12,5."],
+      en: ["What is the average of 4, 8, 15 and 23?", "Add them: 4 + 8 + 15 + 23 = 50. Divide by 4: 50 ÷ 4 = 12.5.", ["12", "12.5", "13", "50"]] },
+    { a: 2, o: ["10", "25", "32", "64"],
+      ky: ["2⁵ канчага барабар?", "2 × 2 × 2 × 2 × 2 = 32."],
+      ru: ["Чему равно 2⁵?", "2 × 2 × 2 × 2 × 2 = 32."],
+      en: ["What is 2⁵?", "2 × 2 × 2 × 2 × 2 = 32."] },
+    { a: 1, o: ["11", "12", "14", "72"],
+      ky: ["√144 канчага барабар?", "12 × 12 = 144, демек √144 = 12."],
+      ru: ["Чему равен √144?", "12 × 12 = 144, значит, √144 = 12."],
+      en: ["What is √144?", "12 × 12 = 144, so √144 = 12."] },
+    { a: 0, o: ["10", "12", "14", "48"],
+      ky: ["Тик бурчтуу үч бурчтуктун катеттери 6 жана 8. Гипотенузасы канча?", "6² + 8² = 36 + 64 = 100, ал эми √100 = 10."],
+      ru: ["Катеты прямоугольного треугольника равны 6 и 8. Чему равна гипотенуза?", "6² + 8² = 36 + 64 = 100, а √100 = 10."],
+      en: ["A right triangle has legs of 6 and 8. How long is the hypotenuse?", "6² + 8² = 36 + 64 = 100, and √100 = 10."] },
+    { a: 2, o: ["0,7", "5/8", "3/4", "0,72"],
+      ky: ["Кайсы сан эң чоң?", "3/4 = 0,75, ал эми 5/8 = 0,625. Эң чоңу — 0,75."],
+      ru: ["Какое число самое большое?", "3/4 = 0,75, а 5/8 = 0,625. Больше всех 0,75."],
+      en: ["Which number is the largest?", "3/4 = 0.75 and 5/8 = 0.625. 0.75 is the largest.", ["0.7", "5/8", "3/4", "0.72"]] }
+  ]},
+  History: { q: [
+    { a: 0,
+      ky: ["Кыргызстан качан көз карандысыздыгын жарыялаган?", "Кыргызстан 1991-жылдын 31-августунда көз карандысыздыгын жарыялаган. Бул — Көз карандысыздык күнү.", ["1991-жылдын 31-августу", "1991-жылдын 25-декабры", "1993-жылдын 10-майы", "1945-жылдын 9-майы"]],
+      ru: ["Когда Кыргызстан провозгласил независимость?", "Кыргызстан провозгласил независимость 31 августа 1991 года. Это День независимости.", ["31 августа 1991", "25 декабря 1991", "10 мая 1993", "9 мая 1945"]],
+      en: ["When did Kyrgyzstan declare independence?", "Kyrgyzstan declared independence on 31 August 1991. It is Independence Day.", ["31 August 1991", "25 December 1991", "10 May 1993", "9 May 1945"]] },
+    { a: 1, o: ["Шахнаме", "Манас", "Гильгамеш", "Алпамыш"],
+      ky: ["Улуу кыргыз эпосу кандай аталат?", "«Манас» — кыргыз элинин улуттук эпосу, дүйнөдөгү эң узун эпостордун бири."],
+      ru: ["Как называется великий кыргызский эпос?", "«Манас» — кыргызский национальный эпос, один из самых длинных эпосов в мире."],
+      en: ["What is the name of the great Kyrgyz epic?", "Manas is the Kyrgyz national epic and one of the longest epic poems in the world.", ["Shahnameh", "Manas", "Gilgamesh", "Alpamysh"]] },
+    { a: 0,
+      ky: ["«Жамийла» повестин ким жазган?", "«Жамийла» (1958) — Чыңгыз Айтматовдун чыгармасы. Ал эң белгилүү кыргыз жазуучусу.", ["Чыңгыз Айтматов", "Токтогул Сатылганов", "Касым Тыныстанов", "Алыкул Осмонов"]],
+      ru: ["Кто написал повесть «Джамиля»?", "«Джамиля» (1958) написал Чингиз Айтматов — самый известный кыргызский писатель.", ["Чингиз Айтматов", "Токтогул Сатылганов", "Касым Тыныстанов", "Алыкул Осмонов"]],
+      en: ["Who wrote the novel “Jamilia”?", "“Jamilia” (1958) is by Chingiz Aitmatov, the most famous Kyrgyz writer.", ["Chingiz Aitmatov", "Toktogul Satylganov", "Kasym Tynystanov", "Alykul Osmonov"]] },
+    { a: 3, o: ["12", "24", "30", "40"],
+      ky: ["Кыргызстандын желегиндеги күндүн канча шооласы бар?", "40 шоола — 40 кыргыз уруусун билдирет."],
+      ru: ["Сколько лучей у солнца на флаге Кыргызстана?", "40 лучей — это 40 кыргызских племён."],
+      en: ["How many rays does the sun on the Kyrgyz flag have?", "40 rays, for the 40 Kyrgyz tribes."] },
+    { a: 0,
+      ky: ["Желектин ортосундагы тегерек — түндүк. Ал эмненин жогорку бөлүгү?", "Түндүк — кыргыздын салттуу турак жайы болгон боз үйдүн чокусундагы тегерек.", ["Боз үйдүн", "Мечиттин", "Чептин", "Ээрдин"]],
+      ru: ["Круг в центре флага — это түндүк. Верхней частью чего он является?", "Түндүк — это круглый купол наверху юрты, традиционного кыргызского жилища.", ["Юрты", "Мечети", "Крепости", "Седла"]],
+      en: ["The circle in the middle of the flag is a tunduk. It is the top part of a…", "The tunduk is the round crown at the top of a yurt, the traditional Kyrgyz home.", ["Yurt", "Mosque", "Fortress", "Saddle"]] },
+    { a: 1, o: ["Пишпек", "Фрунзе", "Верный", "Пржевальск"],
+      ky: ["1926–1991-жылдары Бишкек кандай аталган?", "1926-жылдан 1991-жылга чейин шаар Фрунзе деп аталып, кийин кайра Бишкек болгон."],
+      ru: ["Как назывался Бишкек с 1926 по 1991 год?", "С 1926 по 1991 год город назывался Фрунзе, а потом снова стал Бишкеком."],
+      en: ["What was Bishkek called from 1926 to 1991?", "The city was named Frunze from 1926 until 1991, when it became Bishkek again.", ["Pishpek", "Frunze", "Verny", "Przhevalsk"]] },
+    { a: 0,
+      ky: ["Токтогул Сатылганов ким болгон?", "Токтогул (1864–1933) — ырларын комуз менен аткарган атактуу акын.", ["Акын", "Аскер башчы", "Окумуштуу", "Хан"]],
+      ru: ["Кем был Токтогул Сатылганов?", "Токтогул (1864–1933) — знаменитый акын, который исполнял свои песни под комуз.", ["Акын (поэт и певец)", "Полководец", "Учёный", "Хан"]],
+      en: ["Who was Toktogul Satylganov?", "Toktogul (1864–1933) was a famous akyn who sang his poems with a komuz.", ["An akyn (poet and singer)", "A general", "A scientist", "A khan"]] },
+    { a: 2,
+      ky: ["Үч кылдуу салттуу кыргыз аспабы кайсы?", "Комуздун үч кылы бар. Кыл кыякта жаа менен ойнолот.", ["Домбра", "Дутар", "Комуз", "Кыл кыяк"]],
+      ru: ["Какой традиционный кыргызский инструмент имеет три струны?", "У комуза три струны. На кыл-кыяке играют смычком.", ["Домбра", "Дутар", "Комуз", "Кыл-кыяк"]],
+      en: ["What is the traditional three-stringed Kyrgyz instrument?", "The komuz has three strings. The kyl-kyiak is played with a bow.", ["Dombra", "Dutar", "Komuz", "Kyl-kyiak"]] },
+    { a: 0, o: ["Токмок", "Ош", "Нарын", "Талас"],
+      ky: ["Улуу Жибек жолу доорундагы Бурана мунарасы кайсы шаардын жанында?", "Бурана мунарасы Чүй өрөөнүндө, Токмоктун жанында."],
+      ru: ["Рядом с каким городом стоит башня Бурана времён Великого шёлкового пути?", "Башня Бурана стоит недалеко от Токмока, в Чуйской долине."],
+      en: ["The Burana Tower, from the Silk Road times, stands near which town?", "The Burana Tower is near Tokmok in the Chüy Valley.", ["Tokmok", "Osh", "Naryn", "Talas"]] },
+    { a: 2,
+      ky: ["ЮНЕСКОнун Дүйнөлүк мурастар тизмесиндеги Сулайман-Тоо кайсы шаарда?", "Сулайман-Тоо — Ош шаарынын ортосундагы ыйык тоо.", ["Бишкек", "Каракол", "Ош", "Жалал-Абад"]],
+      ru: ["В каком городе находится Сулайман-Тоо, объект Всемирного наследия ЮНЕСКО?", "Сулайман-Тоо — священная гора в центре Оша.", ["Бишкек", "Каракол", "Ош", "Джалал-Абад"]],
+      en: ["Sulaiman-Too, a UNESCO World Heritage Site, is in which city?", "Sulaiman-Too is a sacred mountain in the middle of Osh.", ["Bishkek", "Karakol", "Osh", "Jalal-Abad"]] },
+    { a: 1, o: ["1991", "1993", "1995", "2000"],
+      ky: ["Кыргызстан өз акчасын — сомду кайсы жылы киргизген?", "Сом 1993-жылдын май айында киргизилген."],
+      ru: ["В каком году Кыргызстан ввёл свою валюту — сом?", "Сом ввели в мае 1993 года."],
+      en: ["In which year did Kyrgyzstan start using its own money, the som?", "The som was introduced in May 1993."] },
+    { a: 1,
+      ky: ["Курманжан Датка ким болгон?", "Курманжан Датка (1811–1907) Алай өрөөнүнүн кыргыздарын башкарган. Аны «Алайдын ханышасы» деп аташат.", ["Биринчи аял космонавт", "XIX кылымда Алай кыргыздарын башкарган аял", "Азыркы ырчы", "«Манастын» автору"]],
+      ru: ["Кем была Курманжан Датка?", "Курманжан Датка (1811–1907) руководила кыргызами Алайской долины. Её называют «Алайской царицей».", ["Первой женщиной-космонавтом", "Правительницей алайских кыргызов в XIX веке", "Современной певицей", "Автором «Манаса»"]],
+      en: ["Who was Kurmanjan Datka?", "Kurmanjan Datka (1811–1907) led the Kyrgyz of the Alay valley. People call her the Queen of the South.", ["The first female cosmonaut", "A ruler of the Alay Kyrgyz in the 1800s", "A modern pop singer", "The author of Manas"]] }
+  ]},
+  Geography: { q: [
+    { a: 2,
+      ky: ["Кыргызстандагы эң чоң көл кайсы?", "Ысык-Көл — өлкөдөгү эң чоң көл жана дүйнөдөгү эң ири тоо көлдөрүнүн бири.", ["Соң-Көл", "Чатыр-Көл", "Ысык-Көл", "Сары-Челек"]],
+      ru: ["Какое озеро самое большое в Кыргызстане?", "Иссык-Куль — самое большое озеро страны и одно из крупнейших горных озёр мира.", ["Сон-Куль", "Чатыр-Куль", "Иссык-Куль", "Сары-Челек"]],
+      en: ["Which lake is the largest in Kyrgyzstan?", "Issyk-Kul is the largest lake in the country and one of the largest mountain lakes in the world.", ["Song-Kul", "Chatyr-Kul", "Issyk-Kul", "Sary-Chelek"]] },
+    { a: 2,
+      ky: ["Кыргызстандын эң бийик чокусу кайсы?", "Жеңиш чокусу (7439 м) — Теңир-Тоонун эң бийик чокусу.", ["Ленин чокусу", "Хан-Теңири", "Жеңиш чокусу", "Эльбрус"]],
+      ru: ["Какая вершина самая высокая в Кыргызстане?", "Пик Победы (Жеңиш чокусу), 7439 м, — высшая точка Тянь-Шаня.", ["Пик Ленина", "Хан-Тенгри", "Пик Победы", "Эльбрус"]],
+      en: ["What is the highest peak in Kyrgyzstan?", "Jengish Chokusu (Pobeda Peak), 7,439 m, is the highest point of the Tian Shan.", ["Lenin Peak", "Khan Tengri", "Jengish Chokusu", "Mount Elbrus"]] },
+    { a: 1,
+      ky: ["Кыргызстандын көпчүлүк бөлүгүн кайсы тоолор ээлейт?", "Өлкөнүн көпчүлүк бөлүгүн Теңир-Тоо ээлейт, түштүгүндө — Памир-Алай.", ["Альп тоолору", "Теңир-Тоо", "Урал", "Кавказ"]],
+      ru: ["Какие горы занимают большую часть Кыргызстана?", "Большую часть страны занимает Тянь-Шань, а на юге — Памиро-Алай.", ["Альпы", "Тянь-Шань", "Урал", "Кавказ"]],
+      en: ["Most of Kyrgyzstan is covered by which mountains?", "The Tian Shan covers most of the country. The Pamir-Alay is in the south.", ["The Alps", "The Tian Shan", "The Urals", "The Caucasus"]] },
+    { a: 2,
+      ky: ["Кыргызстан кайсы өлкө менен чектешпейт?", "Кыргызстан Казакстан, Кытай, Тажикстан жана Өзбекстан менен чектешет. Түркмөнстан менен чектешпейт.", ["Казакстан", "Кытай", "Түркмөнстан", "Тажикстан"]],
+      ru: ["С какой страной Кыргызстан НЕ граничит?", "Кыргызстан граничит с Казахстаном, Китаем, Таджикистаном и Узбекистаном, но не с Туркменистаном.", ["Казахстан", "Китай", "Туркменистан", "Таджикистан"]],
+      en: ["Which country does NOT border Kyrgyzstan?", "Kyrgyzstan borders Kazakhstan, China, Tajikistan and Uzbekistan, but not Turkmenistan.", ["Kazakhstan", "China", "Turkmenistan", "Tajikistan"]] },
+    { a: 1, o: ["5", "7", "9", "12"],
+      ky: ["Кыргызстанда канча облус бар?", "7 облус: Баткен, Жалал-Абад, Ысык-Көл, Нарын, Ош, Талас жана Чүй."],
+      ru: ["Сколько областей в Кыргызстане?", "7 областей: Баткенская, Джалал-Абадская, Иссык-Кульская, Нарынская, Ошская, Таласская и Чуйская."],
+      en: ["How many regions (oblasts) does Kyrgyzstan have?", "7 regions: Batken, Chüy, Issyk-Kul, Jalal-Abad, Naryn, Osh and Talas."] },
+    { a: 2,
+      ky: ["Кыргызстандагы эң узун дарыя кайсы?", "Нарын — эң узун дарыя. Кийин ал Кара-Дарыя менен кошулуп, Сыр-Дарыяны түзөт.", ["Чүй", "Талас", "Нарын", "Кара-Дарыя"]],
+      ru: ["Какая река самая длинная в Кыргызстане?", "Нарын — самая длинная река. Потом она сливается с Кара-Дарьёй и образует Сырдарью.", ["Чу", "Талас", "Нарын", "Кара-Дарья"]],
+      en: ["Which is the longest river in Kyrgyzstan?", "The Naryn is the longest river. Later it joins the Kara-Darya to form the Syr Darya.", ["Chüy", "Talas", "Naryn", "Kara-Darya"]] },
+    { a: 0,
+      ky: ["Ысык-Көл эмне үчүн «ысык» деп аталат?", "Ысык-Көл кышында тоңбойт. Ошондуктан аны «ысык», башкача айтканда жылуу көл деп аташат.", ["Кышында тоңбогону үчүн", "Суусу кайнап турганы үчүн", "Чөлдүн ортосунда жайгашканы үчүн", "Жанында вулкан болгону үчүн"]],
+      ru: ["Что означает название «Иссык-Куль»?", "«Иссык-Куль» значит «тёплое озеро». Зимой оно не замерзает.", ["Тёплое озеро", "Голубое озеро", "Большое море", "Холодная вода"]],
+      en: ["What does the name “Issyk-Kul” mean?", "Issyk-Kul means “warm lake”. It does not freeze in winter.", ["Warm lake", "Blue lake", "Big sea", "Cold water"]] },
+    { a: 2, o: ["800 м", "1607 м", "3016 м", "5000 м"],
+      ky: ["Соң-Көл болжол менен кандай бийиктикте жайгашкан?", "Соң-Көл деңиз деңгээлинен болжол менен 3016 м бийиктикте."],
+      ru: ["На какой высоте примерно находится озеро Сон-Куль?", "Сон-Куль лежит на высоте около 3016 м над уровнем моря."],
+      en: ["Song-Kul lake lies at about what height?", "Song-Kul is about 3,016 m above sea level.", ["800 m", "1,607 m", "3,016 m", "5,000 m"]] },
+    { a: 0, o: ["Ош", "Каракол", "Нарын", "Токмок"],
+      ky: ["Чоңдугу боюнча Кыргызстандагы экинчи шаар кайсы?", "Ош — Бишкектен кийинки экинчи чоң шаар."],
+      ru: ["Какой город второй по величине в Кыргызстане?", "Ош — второй по величине город после Бишкека."],
+      en: ["Which is the second largest city in Kyrgyzstan?", "Osh is the second largest city, after Bishkek.", ["Osh", "Karakol", "Naryn", "Tokmok"]] },
+    { a: 0,
+      ky: ["Арстанбап эмнеси менен белгилүү?", "Арстанбапта дүйнөдөгү эң чоң жаңгак токойлорунун бири өсөт.", ["Жаңгак токою", "Чөлдөрү", "Вулкандары", "Деңиз порту"]],
+      ru: ["Чем знаменит Арсланбоб?", "В Арсланбобе растёт один из самых больших ореховых лесов в мире.", ["Ореховым лесом", "Пустынями", "Вулканами", "Морским портом"]],
+      en: ["What is Arslanbob famous for?", "Arslanbob has one of the largest walnut forests in the world.", ["Its walnut forest", "Its deserts", "Its volcanoes", "Its sea port"]] },
+    { a: 1, o: ["50 000 км²", "200 000 км²", "500 000 км²", "1 000 000 км²"],
+      ky: ["Кыргызстандын аянты болжол менен канча?", "Кыргызстандын аянты болжол менен 200 миң чарчы километр."],
+      ru: ["Какова примерно площадь Кыргызстана?", "Площадь Кыргызстана — около 200 тысяч квадратных километров."],
+      en: ["About how big is Kyrgyzstan?", "Kyrgyzstan covers about 200,000 square kilometers.", ["50,000 km²", "200,000 km²", "500,000 km²", "1,000,000 km²"]] },
+    { a: 0,
+      ky: ["Кытай чек арасына жакын, болжол менен 3530 м бийиктиктеги көл кайсы?", "Чатыр-Көл Ат-Башы районунда, Торугарт ашуусуна жакын жайгашкан.", ["Чатыр-Көл", "Ысык-Көл", "Сары-Челек", "Токтогул суу сактагычы"]],
+      ru: ["Какое высокогорное озеро у границы с Китаем лежит на высоте около 3530 м?", "Чатыр-Куль находится в Ат-Башинском районе, недалеко от перевала Торугарт.", ["Чатыр-Куль", "Иссык-Куль", "Сары-Челек", "Токтогульское водохранилище"]],
+      en: ["Which high lake near the Chinese border lies at about 3,530 m?", "Chatyr-Kul is in the At-Bashy area, near the Torugart pass.", ["Chatyr-Kul", "Issyk-Kul", "Sary-Chelek", "Toktogul Reservoir"]] }
+  ]},
+  English: { q: [
+    { a: 1, q: "The past tense of “go” is…", o: ["goed", "went", "gone", "going"],
+      ky: [null, "«Go» — туура эмес этиш: go → went → gone."],
+      ru: [null, "«Go» — неправильный глагол: go → went → gone."],
+      en: [null, "“Go” is irregular: go → went → gone."] },
+    { a: 2, q: "She ___ to school every day.", o: ["go", "going", "goes", "gone"],
+      ky: [null, "Present Simple чагында he, she, it менен этишке -s же -es кошулат: she goes."],
+      ru: [null, "В Present Simple с he, she, it к глаголу добавляется -s или -es: she goes."],
+      en: [null, "In the present simple, he, she and it take -s or -es: she goes."] },
+    { a: 1, q: "I have lived here ___ 2020.", o: ["for", "since", "from", "during"],
+      ky: [null, "«Since» убакыттын белгилүү бир чекити менен, «for» убакыттын узактыгы менен колдонулат."],
+      ru: [null, "«Since» — с какого-то момента, «for» — в течение какого-то срока."],
+      en: [null, "Use “since” with a point in time and “for” with a length of time."] },
+    { a: 2, q: "A word that means the same as “rapid” is…", o: ["slow", "quiet", "fast", "heavy"],
+      ky: [null, "«Rapid» — «тез» дегенди билдирет, башкача айтканда fast."],
+      ru: [null, "«Rapid» значит «быстрый», то есть fast."],
+      en: [null, "“Rapid” means fast."] },
+    { a: 1, q: "The opposite of “ancient” is…", o: ["old", "modern", "tall", "famous"],
+      ky: [null, "«Ancient» — «байыркы» дегенди билдирет, ошондуктан карама-каршысы — «modern»."],
+      ru: [null, "«Ancient» значит «древний», поэтому противоположное слово — «modern»."],
+      en: [null, "“Ancient” means very old, so the opposite is “modern”."] },
+    { a: 2, q: "Choose the correct sentence.", o: ["He don't like tea.", "He doesn't likes tea.", "He doesn't like tea.", "He not like tea."],
+      ky: [null, "He, she, it менен: doesn't + этиштин баштапкы формасы (like)."],
+      ru: [null, "С he, she, it: doesn't + глагол в начальной форме (like)."],
+      en: [null, "With he, she and it: doesn't + the base verb (like)."] },
+    { a: 0, q: "If it rains tomorrow, we ___ at home.", o: ["will stay", "stayed", "would stayed", "stays"],
+      ky: [null, "Биринчи типтеги шарттуу сүйлөм: if + Present Simple, андан кийин will + этиш."],
+      ru: [null, "Условное предложение первого типа: if + Present Simple, затем will + глагол."],
+      en: [null, "First conditional: if + present simple, then will + verb."] },
+    { a: 2, q: "This is the ___ book I have ever read.", o: ["good", "better", "best", "most good"],
+      ky: [null, "«Ever» менен артыкчылык даража колдонулат: the best."],
+      ru: [null, "С «ever» используется превосходная степень: the best."],
+      en: [null, "Use the superlative “best” with “ever”."] },
+    { a: 1, q: "There ___ many students in the hall.", o: ["is", "are", "was", "be"],
+      ky: [null, "«Students» — көптүк сан, ошондуктан «are» керек."],
+      ru: [null, "«Students» — множественное число, поэтому нужно «are»."],
+      en: [null, "“Students” is plural, so use “are”."] },
+    { a: 2, q: "What is the plural of “child”?", o: ["childs", "childes", "children", "childrens"],
+      ky: [null, "«Child» — өзгөчө сөз: one child, two children."],
+      ru: [null, "«Child» — исключение: one child, two children."],
+      en: [null, "“Child” is irregular: one child, two children."] },
+    { a: 2, q: "I'm very interested ___ science.", o: ["on", "at", "in", "for"],
+      ky: [null, "«Interested in» деп айтылат."],
+      ru: [null, "Правильно говорить «interested in»."],
+      en: [null, "We say “interested in” something."] },
+    { a: 1, q: "By the time we arrived, the film ___.", o: ["has started", "had started", "starts", "was start"],
+      ky: [null, "Past Perfect (had started) бир иш өткөндөгү башка иштен мурун болгонун көрсөтөт."],
+      ru: [null, "Past Perfect (had started) показывает, что действие произошло раньше другого действия в прошлом."],
+      en: [null, "Past perfect (had started) shows it happened before another past action."] }
+  ]},
+  Science: { q: [
+    { a: 2, o: ["So", "Sd", "Na", "S"],
+      ky: ["Натрийдин химиялык белгиси кандай?", "Na — латынча «natrium» деген аталыштан."],
+      ru: ["Какой химический знак у натрия?", "Na — от латинского названия «natrium»."],
+      en: ["What is the chemical symbol for sodium?", "Na comes from the Latin name “natrium”."] },
+    { a: 1,
+      ky: ["Клетканын кайсы бөлүгү энергияны эң көп өндүрөт?", "Митохондриялар азыкты клетка колдоно ала турган энергияга айландырат.", ["Ядро", "Митохондрия", "Рибосома", "Клетка дубалы"]],
+      ru: ["Какая часть клетки вырабатывает больше всего энергии?", "Митохондрии превращают питательные вещества в энергию для клетки.", ["Ядро", "Митохондрии", "Рибосома", "Клеточная стенка"]],
+      en: ["Which part of the cell makes most of its energy?", "Mitochondria turn food into energy the cell can use.", ["Nucleus", "Mitochondria", "Ribosome", "Cell wall"]] },
+    { a: 1, o: ["90 °C", "100 °C", "120 °C", "80 °C"],
+      ky: ["Деңиз деңгээлинде суу канча градуста кайнайт?", "Кадимки басымда суу 100 °C кайнайт. Бийик тоолордо ал төмөнүрөөк температурада кайнайт."],
+      ru: ["При какой температуре кипит вода на уровне моря?", "При обычном давлении вода кипит при 100 °C. Высоко в горах — при более низкой температуре."],
+      en: ["At sea level, water boils at…", "At normal air pressure water boils at 100 °C. High in the mountains it boils at a lower temperature."] },
+    { a: 2,
+      ky: ["Күнгө эң жакын планета кайсы?", "Меркурий — Күнгө эң жакын планета.", ["Венера", "Марс", "Меркурий", "Жер"]],
+      ru: ["Какая планета ближе всех к Солнцу?", "Меркурий — самая близкая к Солнцу планета.", ["Венера", "Марс", "Меркурий", "Земля"]],
+      en: ["Which planet is closest to the Sun?", "Mercury is the closest planet to the Sun.", ["Venus", "Mars", "Mercury", "Earth"]] },
+    { a: 2,
+      ky: ["Өсүмдүктөр фотосинтез үчүн кайсы газды сиңирет?", "Өсүмдүктөр көмүр кычкыл газын сиңирип, кычкылтек бөлүп чыгарат.", ["Кычкылтек", "Азот", "Көмүр кычкыл газы", "Суутек"]],
+      ru: ["Какой газ растения поглощают для фотосинтеза?", "Растения поглощают углекислый газ и выделяют кислород.", ["Кислород", "Азот", "Углекислый газ", "Водород"]],
+      en: ["Which gas do plants take in for photosynthesis?", "Plants take in carbon dioxide and give out oxygen.", ["Oxygen", "Nitrogen", "Carbon dioxide", "Hydrogen"]] },
+    { a: 2, o: ["Джоуль", "Ватт", "Ньютон", "Паскаль"],
+      ky: ["Күч эмне менен өлчөнөт?", "Күч ньютон (Н) менен өлчөнөт."],
+      ru: ["В чём измеряется сила?", "Сила измеряется в ньютонах (Н)."],
+      en: ["What is the unit of force?", "Force is measured in newtons (N).", ["Joule", "Watt", "Newton", "Pascal"]] },
+    { a: 1, o: ["106", "206", "306", "406"],
+      ky: ["Чоң кишинин денесинде канча сөөк бар?", "Чоң кишинин скелетинде 206 сөөк бар."],
+      ru: ["Сколько костей у взрослого человека?", "В скелете взрослого человека 206 костей."],
+      en: ["How many bones does an adult human have?", "An adult skeleton has 206 bones."] },
+    { a: 1,
+      ky: ["Абада кайсы газ эң көп?", "Абанын болжол менен 78% — азот, 21% — кычкылтек.", ["Кычкылтек", "Азот", "Көмүр кычкыл газы", "Аргон"]],
+      ru: ["Какого газа больше всего в воздухе?", "Воздух примерно на 78% состоит из азота и на 21% — из кислорода.", ["Кислород", "Азот", "Углекислый газ", "Аргон"]],
+      en: ["Which gas makes up most of the air?", "Air is about 78% nitrogen and about 21% oxygen.", ["Oxygen", "Nitrogen", "Carbon dioxide", "Argon"]] },
+    { a: 2, o: ["300 км/с", "3000 км/с", "300 000 км/с", "3 000 000 км/с"],
+      ky: ["Жарык болжол менен кандай ылдамдыкта таралат?", "Жарык бир секундда болжол менен 300 000 километр өтөт."],
+      ru: ["С какой примерно скоростью распространяется свет?", "Свет проходит около 300 000 километров за секунду."],
+      en: ["About how fast does light travel?", "Light travels about 300,000 kilometers every second.", ["300 km/s", "3,000 km/s", "300,000 km/s", "3,000,000 km/s"]] },
+    { a: 1,
+      ky: ["pH 7 болгон суюктук кандай?", "pH 7 — нейтралдуу чөйрө. 7ден аз болсо — кычкыл, 7ден көп болсо — щелочтуу.", ["Кычкыл", "Нейтралдуу", "Щелочтуу", "Туздуу"]],
+      ru: ["Жидкость с pH 7 — какая?", "pH 7 — нейтральная среда. Меньше 7 — кислотная, больше 7 — щелочная.", ["Кислотная", "Нейтральная", "Щелочная", "Солёная"]],
+      en: ["A liquid with pH 7 is…", "pH 7 is neutral. Below 7 is acidic and above 7 is basic.", ["Acidic", "Neutral", "Basic", "Salty"]] },
+    { a: 1,
+      ky: ["Кандагы кайсы клеткалар инфекция менен күрөшөт?", "Лейкоциттер (ак кан клеткалары) организмди микробдордон коргойт.", ["Эритроциттер", "Лейкоциттер", "Тромбоциттер", "Плазма"]],
+      ru: ["Какие клетки крови борются с инфекциями?", "Лейкоциты (белые клетки крови) защищают организм от микробов.", ["Эритроциты", "Лейкоциты", "Тромбоциты", "Плазма"]],
+      en: ["Which blood cells fight infections?", "White blood cells defend the body against germs.", ["Red blood cells", "White blood cells", "Platelets", "Plasma"]] },
+    { a: 1, o: ["Юпитер", "Марс", "Венера", "Сатурн"],
+      ky: ["Кайсы планетаны Кызыл планета деп аташат?", "Марстын топурагында темир оксиди (дат) көп болгондуктан, ал кызыл көрүнөт."],
+      ru: ["Какую планету называют Красной планетой?", "Марс кажется красным из-за оксида железа (ржавчины) в его грунте."],
+      en: ["Which planet is called the Red Planet?", "Mars looks red because of iron oxide (rust) in its soil.", ["Jupiter", "Mars", "Venus", "Saturn"]] }
+  ]}
+};
+function qx(Q) { const L = Q[LANG] || Q.ru; return { q: L[0] || Q.q, why: L[1], o: L[2] || Q.o, a: Q.a }; }
+
+/* Flashcards */
+const WORDS = [ /* [Kyrgyz, Russian, English] */
+  ["Салам", "Привет", "Hello"],
+  ["Рахмат", "Спасибо", "Thank you"],
+  ["Кандайсың?", "Как дела?", "How are you?"],
+  ["Мектеп", "Школа", "School"],
+  ["Сабак", "Урок", "Lesson"],
+  ["Китепкана", "Библиотека", "Library"],
+  ["Мугалим", "Учитель", "Teacher"],
+  ["Окуучу", "Ученик", "Pupil, student"],
+  ["Билим", "Знание", "Knowledge"],
+  ["Илим", "Наука", "Science"],
+  ["Тарых", "История", "History"],
+  ["Маселе", "Задача, проблема", "Problem, task"],
+  ["Дос", "Друг", "Friend"],
+  ["Тоо", "Гора", "Mountain"],
+  ["Жылдыз", "Звезда", "Star"],
+  ["Кыял", "Мечта", "Dream"],
+  ["Ийгилик", "Успех", "Success"],
+  ["Келечек", "Будущее", "Future"],
+  ["Мекен", "Родина", "Homeland"],
+  ["Эмгек", "Труд", "Work, labor"]
+];
+const ENG = [ /* [English word, Russian, Kyrgyz, meaning in English] */
+  ["achieve", "достигать", "жетишүү", "to succeed in doing something"],
+  ["knowledge", "знание", "билим", "what you know and understand"],
+  ["improve", "улучшать", "жакшыртуу", "to make something better"],
+  ["because", "потому что", "анткени", "for the reason that"],
+  ["require", "требовать", "талап кылуу", "to need something"],
+  ["measure", "измерять", "өлчөө", "to find the size or amount of something"],
+  ["environment", "окружающая среда", "айлана-чөйрө", "the natural world around us"],
+  ["experience", "опыт", "тажрыйба", "knowledge you get by doing things"],
+  ["decide", "решать", "чечүү", "to make a choice"],
+  ["enough", "достаточно", "жетиштүү", "as much as you need"],
+  ["borrow", "брать взаймы", "карызга алуу", "to take something and give it back later"],
+  ["increase", "увеличивать", "көбөйтүү", "to become or make bigger"]
+];
+const MATHF = [ /* [Russian, Kyrgyz, formula, English] */
+  ["Площадь круга", "Тегеректин аянты", "S = πr²", "Area of a circle"],
+  ["Длина окружности", "Айлананын узундугу", "C = 2πr", "Circumference of a circle"],
+  ["Теорема Пифагора", "Пифагордун теоремасы", "a² + b² = c²", "Pythagorean theorem"],
+  ["Площадь треугольника", "Үч бурчтуктун аянты", "S = ½ · a · h", "Area of a triangle"],
+  ["Площадь прямоугольника", "Тик бурчтуктун аянты", "S = a · b", "Area of a rectangle"],
+  ["Объём куба", "Кубдун көлөмү", "V = a³", "Volume of a cube"],
+  ["Скорость", "Ылдамдык", "v = s / t", "Speed"],
+  ["(a + b)²", "(a + b)²", "a² + 2ab + b²", "(a + b)²"],
+  ["a² − b²", "a² − b²", "(a − b)(a + b)", "a² − b²"],
+  ["Сумма углов треугольника", "Үч бурчтуктун бурчтарынын суммасы", "α + β + γ = 180°", "Angles in a triangle"],
+  ["x% от числа N", "N санынын x пайызы", "N · x / 100", "x% of a number N"],
+  ["Среднее арифметическое", "Орточо арифметикалык", "(a₁ + a₂ + … + aₙ) / n", "Average of n numbers"]
+];
+const SCI = [ /* [Russian term, Russian meaning, Kyrgyz term, Kyrgyz meaning, English term, English meaning] */
+  ["Фотосинтез", "Растения создают питательные вещества из света, воды и CO₂", "Фотосинтез", "Өсүмдүктөр жарыктан, суудан жана CO₂ден азык жаратат", "Photosynthesis", "Plants make food from light, water and CO₂"],
+  ["Атом", "Самая маленькая частица химического элемента", "Атом", "Химиялык элементтин эң кичине бөлүкчөсү", "Atom", "The smallest unit of a chemical element"],
+  ["Химический элемент", "Вещество из атомов одного вида", "Химиялык элемент", "Бир гана түрдөгү атомдордон турган зат", "Element", "A substance made of only one kind of atom"],
+  ["Смесь", "Вещества смешаны, но химически не соединены", "Аралашма", "Заттар аралашкан, бирок химиялык жактан бириккен эмес", "Mixture", "Substances mixed together but not chemically joined"],
+  ["Гравитация", "Сила, с которой тела притягиваются друг к другу", "Тартылуу күчү", "Нерселердин бири-бирине тартылуу күчү", "Gravity", "The force that pulls objects toward each other"],
+  ["Испарение", "Жидкость превращается в газ", "Буулануу", "Суюктуктун газга айланышы", "Evaporation", "A liquid turning into a gas"],
+  ["Плотность", "Масса, делённая на объём: ρ = m / V", "Тыгыздык", "Массаны көлөмгө бөлгөнгө барабар: ρ = m / V", "Density", "Mass divided by volume: ρ = m / V"],
+  ["Второй закон Ньютона", "F = m · a", "Ньютондун экинчи мыйзамы", "F = m · a", "Newton's second law", "F = m · a"],
+  ["Клетка", "Основная единица жизни", "Клетка", "Тирүү организмдин негизги бирдиги", "Cell", "The basic unit of life"],
+  ["Экосистема", "Живые организмы и их среда вместе", "Экосистема", "Тирүү организмдер жана алардын чөйрөсү бирге", "Ecosystem", "Living things and their environment working together"],
+  ["Скорость (вектор)", "Скорость с направлением", "Ылдамдык (вектор)", "Багыты бар ылдамдык", "Velocity", "Speed in a given direction"],
+  ["Осмос", "Вода проходит через мембрану туда, где больше растворённого вещества", "Осмос", "Суунун мембрана аркылуу эриген зат көп жакка өтүшү", "Osmosis", "Water moving through a membrane toward the side with more dissolved substance"]
+];
+const DECKS = {
+  words: { name: { ky: "Орусча сөздөр", ru: "Кыргызские слова", en: "Kyrgyz words" }, labels: { ky: ["Орусча", "Кыргызча"], ru: ["Кыргызча", "Русский"], en: ["Kyrgyz", "English"] },
+    cards: () => WORDS.map(w => LANG === "ru" ? [w[0], w[1]] : LANG === "en" ? [w[0], w[2]] : [w[1], w[0]]) },
+  english: { name: { ky: "Англисче сөздөр", ru: "Английские слова", en: "English words" }, labels: { ky: ["English", "Кыргызча"], ru: ["English", "Русский"], en: ["Word", "Meaning"] },
+    cards: () => ENG.map(w => [w[0], LANG === "ru" ? w[1] : LANG === "en" ? w[3] : w[2]]) },
+  math: { name: { ky: "Формулалар", ru: "Формулы", en: "Formulas" }, labels: { ky: ["Суроо", "Формула"], ru: ["Вопрос", "Формула"], en: ["Question", "Formula"] },
+    cards: () => MATHF.map(w => [LANG === "ru" ? w[0] : LANG === "en" ? w[3] : w[1], w[2]]) },
+  science: { name: { ky: "Терминдер", ru: "Термины", en: "Science terms" }, labels: { ky: ["Термин", "Мааниси"], ru: ["Термин", "Значение"], en: ["Term", "Meaning"] },
+    cards: () => SCI.map(w => LANG === "ru" ? [w[0], w[1]] : LANG === "en" ? [w[4], w[5]] : [w[2], w[3]]) }
+};
+
+const BADGES = [
+  { id: "first", icon: "flag", test: () => P.quizzes >= 1 },
+  { id: "perfect", icon: "star", test: () => P.perfects >= 1 },
+  { id: "streak3", icon: "flame", test: () => P.bestStreak >= 3 },
+  { id: "streak7", icon: "flame", test: () => P.bestStreak >= 7 },
+  { id: "cards50", icon: "cards", test: () => P.cards >= 50 },
+  { id: "focus5", icon: "timer", test: () => P.focusSessions >= 5 },
+  { id: "idea", icon: "bulb", test: () => P.ideas >= 1 },
+  { id: "daily5", icon: "sun", test: () => P.dailyCount >= 5 },
+  { id: "songkul", icon: "mount", test: () => P.xp >= 250 },
+  { id: "summit", icon: "mount", test: () => P.xp >= 2500 }
+];
+const bName = b => t("b_" + b.id), bDesc = b => t("b_" + b.id + "_d");
+
+const SUBJECTS = ["General", "Math", "History", "Geography", "English", "Science", "Kyrgyz", "Russian", "ORT"];
+const SUBJ_BG = { General: "var(--surface-2)", Math: "var(--sun-soft)", History: "var(--gold-soft)", Geography: "var(--glacier-soft)", English: "var(--glacier-soft)", Science: "var(--surface-2)", Kyrgyz: "var(--sun-soft)", Russian: "var(--gold-soft)", ORT: "var(--gold-soft)" };
+
+/* ================= Progress (saved on this device) ================= */
+const fresh = () => ({ xp: 0, days: {}, met: {}, quizzes: 0, perfects: 0, cards: 0, focusMin: 0, focusSessions: 0, ideas: 0, daily: {}, dailyCount: 0, mistakes: [], bestStreak: 0, badges: {}, name: "", goal: 50, sound: true, theme: "system" });
+function load() {
+  let p = LS.get("progress", null);
+  if (!p) {
+    try {
+      const old = JSON.parse(localStorage.getItem("tunduk:progress") || "null");
+      if (old && typeof old === "object") {
+        p = { xp: +old.xp || 0, days: old.days || {}, quizzes: +old.quizzes || 0, focusMin: +old.focusMin || 0, met: {} };
+        Object.keys(p.days).forEach(k => { if (p.days[k] >= 50) p.met[k] = true; });
+      }
+    } catch (e) {}
+  }
+  p = Object.assign(fresh(), p || {});
+  ["days", "met", "daily", "badges"].forEach(k => { if (!p[k] || typeof p[k] !== "object" || Array.isArray(p[k])) p[k] = {}; });
+  if (!Array.isArray(p.mistakes)) p.mistakes = [];
+  p.goal = [30, 50, 100].includes(+p.goal) ? +p.goal : 50;
+  return p;
+}
+let P = load();
+const save = () => LS.set("progress", P);
+
+function levelOf(xp) { let i = 0; LEVELS.forEach((L, k) => { if (xp >= L.xp) i = k; }); return i; }
+function streak() { let n = 0; const d = new Date(); if (!P.met[dayKey(d)]) d.setDate(d.getDate() - 1); while (P.met[dayKey(d)]) { n++; d.setDate(d.getDate() - 1); } return n; }
+
+function addXP(n, why) {
+  const lvBefore = levelOf(P.xp);
+  const k = dayKey(); const before = P.days[k] || 0;
+  P.xp += n; P.days[k] = before + n;
+  let goalNow = false;
+  if (!P.met[k] && P.days[k] >= P.goal) { P.met[k] = true; goalNow = true; }
+  const s = streak(); if (s > P.bestStreak) P.bestStreak = s;
+  save();
+  const lvAfter = levelOf(P.xp);
+  if (lvAfter > lvBefore) { celebrate(); toast(t("levelUp", { place: lvName(LEVELS[lvAfter]), alt: fmt(LEVELS[lvAfter].alt) }), 3200); }
+  else if (goalNow) { celebrate(); toast(t("goalToast"), 3000); }
+  else toast(t("xpToast", { n: n, why: why }));
+  checkBadges(); refresh();
+}
+function checkBadges() {
+  const got = [];
+  BADGES.forEach(b => { if (!P.badges[b.id] && b.test()) { P.badges[b.id] = dayKey(); got.push(b); } });
+  if (got.length) { save(); got.forEach(b => toast(t("badgeToast", { name: bName(b) }), 2600)); }
+}
+const sameQ = (m, s, i) => m[0] === s && m[1] === i;
+function addMistake(s, i) { if (!P.mistakes.some(m => sameQ(m, s, i))) { P.mistakes.push([s, i]); if (P.mistakes.length > 60) P.mistakes.shift(); save(); } }
+function removeMistake(s, i) { P.mistakes = P.mistakes.filter(m => !sameQ(m, s, i)); save(); }
+const validMistakes = () => P.mistakes.filter(m => Array.isArray(m) && QUIZ[m[0]] && QUIZ[m[0]].q[m[1]]);
+
+/* ================= Toasts, sounds, confetti ================= */
+const TQ = []; let tBusy = false;
+function toast(msg, ms) { TQ.push([msg, ms || 1700]); if (TQ.length > 3) TQ.shift(); if (!tBusy) nextToast(); }
+function nextToast() {
+  const it = TQ.shift(), el = $("#toast");
+  if (!it) { tBusy = false; return; }
+  tBusy = true; el.textContent = it[0]; el.classList.add("show");
+  setTimeout(() => { el.classList.remove("show"); setTimeout(nextToast, 260); }, it[1]);
+}
+
+let AC = null;
+function ensureAudio() {
+  if (!P.sound) return;
+  try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === "suspended") AC.resume(); } catch (e) { AC = null; }
+}
+function sfx(kind) {
+  if (!P.sound) return; ensureAudio(); if (!AC) return;
+  try {
+    const notes = kind === "good" ? [[660, 0], [880, .09]] : kind === "bad" ? [[220, 0], [175, .11]] : [[523, 0], [659, .18], [784, .36], [1047, .54]];
+    notes.forEach(([f, tt]) => {
+      const o = AC.createOscillator(), g = AC.createGain(), at = AC.currentTime + tt;
+      o.type = kind === "bad" ? "triangle" : "sine"; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(0.16, at + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, at + 0.28);
+      o.connect(g); g.connect(AC.destination); o.start(at); o.stop(at + 0.32);
+    });
+  } catch (e) {}
+}
+document.addEventListener("pointerdown", ensureAudio);
+
+let CF = null;
+function celebrate() {
+  if (reduceMotion()) return;
+  const c = $("#confetti"); if (!c || !c.getContext) return;
+  const W = window.innerWidth, H = window.innerHeight;
+  const cs = getComputedStyle(document.documentElement);
+  const cols = ["--sun", "--gold", "--glacier", "--good"].map(v => cs.getPropertyValue(v).trim()).filter(Boolean);
+  const add = Array.from({ length: 140 }, () => ({ x: W / 2 + (Math.random() - .5) * W * .5, y: H * .32 + (Math.random() - .5) * 40, vx: (Math.random() - .5) * 14, vy: -(Math.random() * 11 + 4), s: Math.random() * 7 + 5, c: cols[Math.floor(Math.random() * cols.length)] || "#f2a900", a: Math.random() * 6.28, va: (Math.random() - .5) * .35 }));
+  if (CF) { CF.ps.push(...add); CF.end = performance.now() + 2400; return; }
+  const ctx = c.getContext("2d"), dpr = Math.min(2, window.devicePixelRatio || 1);
+  c.width = W * dpr; c.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); c.hidden = false;
+  CF = { ps: add, end: performance.now() + 2400, last: performance.now() };
+  const frame = tm => {
+    const dt = Math.min(2, Math.max(0, (tm - CF.last) / 16.7)); CF.last = tm;
+    ctx.clearRect(0, 0, W, H);
+    for (const p of CF.ps) {
+      p.vy += .32 * dt; p.vx *= Math.pow(.99, dt); p.x += p.vx * dt; p.y += p.vy * dt; p.a += p.va * dt;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.a); ctx.fillStyle = p.c; ctx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); ctx.restore();
+    }
+    if (tm < CF.end) requestAnimationFrame(frame); else { ctx.clearRect(0, 0, W, H); c.hidden = true; CF = null; }
+  };
+  requestAnimationFrame(frame);
+}
+
+/* ================= Climb scene ================= */
+const TRAIL = [[500,306],[590,292],[660,272],[612,250],[690,228],[740,198],[718,178],[790,150],[768,126],[834,104],[812,82],[820,60]];
+const SEG = []; let TLEN = 0;
+for (let i = 1; i < TRAIL.length; i++) { const a = TRAIL[i - 1], b = TRAIL[i], l = Math.hypot(b[0] - a[0], b[1] - a[1]); SEG.push([a, b, l]); TLEN += l; }
+function trailAt(f) {
+  let d = Math.max(0, Math.min(1, f)) * TLEN;
+  for (const [a, b, l] of SEG) { if (d <= l) { const k = l ? d / l : 0; return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k]; } d -= l; }
+  return TRAIL[TRAIL.length - 1];
+}
+function starField(count, seed) {
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  let s = "";
+  for (let i = 0; i < count; i++) {
+    const x = (rnd() * 1000).toFixed(1), y = (8 + rnd() * 150).toFixed(1), r = (rnd() * 1.3 + .5).toFixed(2), o = (rnd() * .55 + .3).toFixed(2), dl = (rnd() * 3).toFixed(2);
+    s += '<circle class="star' + (i % 4 === 0 ? " tw" : "") + '" cx="' + x + '" cy="' + y + '" r="' + r + '" opacity="' + o + '" style="animation-delay:' + dl + 's"/>';
+  }
+  return s;
+}
+function renderCheckpoints() {
+  let c = "";
+  LEVELS.forEach((L, i) => { const p = trailAt(i / (LEVELS.length - 1)); c += '<circle class="cp" data-i="' + i + '" cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="5"><title>' + lvName(L) + " · " + fmt(L.alt) + mUnit() + "</title></circle>"; });
+  $("#checkpoints").innerHTML = c;
+}
+function initScene() {
+  $("#trail").setAttribute("d", "M" + TRAIL.map(p => p.join(" ")).join(" L"));
+  $("#stars").innerHTML = starField(48, 7);
+  $("#wStars").innerHTML = starField(60, 11);
+  $("#wStars").classList.add("scene");
+  renderCheckpoints();
+  const card = $("#climb"), svg = $("#scene");
+  const apply = w => {
+    const mode = w >= 900 ? "wide" : w >= 560 ? "mid" : "narrow";
+    card.classList.toggle("wide", mode === "wide");
+    card.classList.toggle("mid", mode === "mid");
+    svg.setAttribute("viewBox", mode === "narrow" ? "455 18 545 302" : "0 0 1000 320");
+    svg.setAttribute("preserveAspectRatio", mode === "wide" ? "xMaxYMax slice" : "xMidYMax meet");
+  };
+  apply(card.getBoundingClientRect().width || window.innerWidth);
+  if (window.ResizeObserver) new ResizeObserver(es => { const w = es[0].contentRect.width; if (w) apply(w); }).observe(card);
+  else window.addEventListener("resize", () => apply(card.getBoundingClientRect().width));
+}
+
+/* ================= Home ================= */
+function renderHero() {
+  const li = levelOf(P.xp), L = LEVELS[li], N = LEVELS[li + 1];
+  $("#hello").textContent = P.name ? t("hiName", { name: P.name }) : t("hiThere");
+  $("#lvlName").textContent = P.xp === 0 ? t("startClimb") : (N ? t("youAre", { place: lvName(L) }) : t("atTop"));
+  $("#lvlAlt").textContent = fmt(L.alt) + mUnit();
+  $("#lvlNext").textContent = N ? t("nextLvl", { place: lvName(N), n: fmt(N.xp - P.xp) }) : t("topLvl");
+  const frac = N ? (P.xp - L.xp) / (N.xp - L.xp) : 1;
+  $("#lvlBar").style.width = (Math.max(0, Math.min(1, frac)) * 100).toFixed(1) + "%";
+  const pos = trailAt(N ? (li + frac) / (LEVELS.length - 1) : 1);
+  $("#marker").setAttribute("transform", "translate(" + pos[0].toFixed(1) + " " + pos[1].toFixed(1) + ")");
+  $$("#checkpoints .cp").forEach(cp => cp.classList.toggle("on", +cp.dataset.i <= li));
+  $("#altTop").textContent = fmt(L.alt) + mUnit();
+  $("#xpTop").textContent = fmt(P.xp);
+  const init = (P.name || "").trim().charAt(0).toUpperCase(), av = $("#avatarTxt");
+  if (init) av.textContent = init; else av.innerHTML = ico("user", 19);
+}
+function renderToday() {
+  const k = dayKey(), done = P.days[k] || 0, g = P.goal;
+  $("#goalNum").textContent = fmt(done);
+  $("#goalOf").textContent = t("ringOf", { g: g });
+  $("#goalArc").style.strokeDashoffset = (314.16 * (1 - Math.min(done / g, 1))).toFixed(1);
+  $("#goalMsg").textContent = done >= g ? t("goalDone") : done > 0 ? t("goalLeft", { n: g - done }) : t("goalStart");
+  $("#goalSub").textContent = done >= g ? t("goalSubDone") : t("goalSub", { g: g });
+  $("#streakTxt").textContent = tn("streakChip", streak());
+  $("#sQuiz").textContent = fmt(P.quizzes); $("#sCards").textContent = fmt(P.cards); $("#sFocus").textContent = fmt(P.focusMin);
+  const names = STR[LANG].days; let h = "";
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i); const dk = dayKey(d);
+    const p = P.met[dk] ? 100 : Math.min(100, Math.round((P.days[dk] || 0) / g * 100));
+    h += '<div class="day' + (i === 0 ? " now" : "") + '" title="' + dk + ": " + (P.days[dk] || 0) + ' XP"><i style="--p:' + p + '%"></i>' + names[d.getDay()] + "</div>";
+  }
+  $("#week").innerHTML = h;
+}
+const badgeIco = b => '<span class="b-ico">' + ico(b.icon, 22) + "</span>";
+function renderBadgeStrip() {
+  const n = BADGES.filter(b => P.badges[b.id]).length;
+  $("#badgeHead").textContent = t("badgesHead", { n: n, m: BADGES.length });
+  const box = $("#badgeStrip"); box.innerHTML = "";
+  BADGES.forEach(b => {
+    const el = document.createElement("div"); el.className = "badge" + (P.badges[b.id] ? " got" : "");
+    el.title = bName(b) + ": " + bDesc(b);
+    el.innerHTML = badgeIco(b) + "<span></span>"; el.lastChild.textContent = bName(b);
+    box.appendChild(el);
+  });
+}
+function renderRoomMeta() {
+  const nCards = Object.keys(DECKS).reduce((n, d) => n + DECKS[d].cards().length, 0);
+  $("#metaPractice").textContent = tn("subjectsN", Object.keys(QUIZ).length) + " · " + tn("questionsN", ALLQ.length);
+  $("#metaCards").textContent = tn("decksN", Object.keys(DECKS).length) + " · " + tn("cardsN", nCards);
+}
+
+/* Question of the day */
+const ALLQ = []; Object.keys(QUIZ).forEach(s => QUIZ[s].q.forEach((_, i) => ALLQ.push([s, i])));
+function dailyRef() { const k = dayKey(); let h = 2166136261; for (let i = 0; i < k.length; i++) { h ^= k.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return ALLQ[h % ALLQ.length]; }
+function renderDaily() {
+  const box = $("#daily"), ref = dailyRef(), s = ref[0], i = ref[1], Q = qx(QUIZ[s].q[i]), k = dayKey();
+  box.innerHTML = '<div class="daily-head"><span class="eyebrow"></span><span class="tag"></span><span class="reward">+20 XP</span></div><p class="qtext"></p><div class="opts"></div><div class="d-after" aria-live="polite"></div>';
+  $(".eyebrow", box).textContent = t("dailyTitle"); $(".tag", box).textContent = subjName(s); $(".qtext", box).textContent = Q.q;
+  const o = $(".opts", box);
+  Q.o.forEach((txt, j) => { const b = document.createElement("button"); b.type = "button"; b.className = "opt"; b.innerHTML = "<kbd>" + "ABCD"[j] + "</kbd><span></span>"; $("span", b).textContent = txt; b.onclick = () => answer(j); o.appendChild(b); });
+  function show(pick) {
+    const bs = $$(".opt", o); bs.forEach(b => { b.disabled = true; });
+    bs[Q.a].classList.add("right"); if (pick !== Q.a && bs[pick]) bs[pick].classList.add("wrong");
+    const a = $(".d-after", box);
+    a.innerHTML = '<div class="explain"><b></b> <span></span></div><p class="d-note"></p>';
+    $(".explain b", a).textContent = pick === Q.a ? t("correct") : t("wrong"); $(".explain span", a).textContent = Q.why; $(".d-note", a).textContent = t("dailyNote");
+  }
+  function answer(j) {
+    if (P.daily[k]) return;
+    P.daily[k] = { pick: j }; P.dailyCount++; save(); show(j);
+    if (j === Q.a) { sfx("good"); addXP(20, t("whyDaily")); } else { sfx("bad"); addMistake(s, i); addXP(5, t("whyTry")); }
+  }
+  if (P.daily[k]) show(P.daily[k].pick);
+}
+
+/* ================= Practice ================= */
+let subj = LS.get("subj", "Math"); if (!QUIZ[subj]) subj = "Math";
+let round = [], qi = 0, score = 0, order = [], answered = false;
+function chip(parent, label, pressed, onClick, extra) {
+  const b = document.createElement("button"); b.type = "button"; b.className = "chip" + (extra ? " " + extra : "");
+  b.textContent = label; b.setAttribute("aria-pressed", String(!!pressed)); b.onclick = onClick; parent.appendChild(b); return b;
+}
+function renderSubjects() {
+  const w = $("#subjects"); w.innerHTML = "";
+  Object.keys(QUIZ).forEach(s => chip(w, subjName(s), s === subj, () => { subj = s; LS.set("subj", s); startRound(); }));
+  const n = validMistakes().length;
+  if (n || subj === "Review") chip(w, t("review", { n: n }), subj === "Review", () => { subj = "Review"; startRound(); }, "chip-review");
+}
+function startRound() {
+  if (subj === "Review") {
+    const m = validMistakes();
+    if (m.length) round = shuffle(m).slice(0, 6);
+    else { subj = LS.get("subj", "Math"); if (!QUIZ[subj]) subj = "Math"; toast(t("noMistakes")); }
+  }
+  if (subj !== "Review") round = shuffle(QUIZ[subj].q.map((_, i) => [subj, i])).slice(0, 6);
+  qi = 0; score = 0; renderSubjects(); renderQ();
+}
+function renderQ() {
+  const box = $("#quiz"), n = round.length; answered = false;
+  if (qi >= n) { finishRound(); return; }
+  const s = round[qi][0], i = round[qi][1], Q = qx(QUIZ[s].q[i]);
+  order = shuffle([0, 1, 2, 3]);
+  box.innerHTML = '<div class="qmeta"><span></span><span></span></div><div class="bar"><i style="width:' + (qi / n * 100).toFixed(1) + '%"></i></div><p class="qtext"></p><div class="opts"></div><div class="q-after" aria-live="polite"></div>';
+  const metaSpans = $$(".qmeta span", box);
+  metaSpans[0].textContent = t("qMeta", { s: (subj === "Review" ? t("reviewPrefix") + " · " : "") + subjName(s), i: qi + 1, n: n });
+  metaSpans[1].textContent = t("score", { n: score });
+  $(".qtext", box).textContent = Q.q;
+  const o = $(".opts", box);
+  order.forEach((oi, j) => { const b = document.createElement("button"); b.type = "button"; b.className = "opt"; b.innerHTML = "<kbd>" + "ABCD"[j] + "</kbd><span></span>"; $("span", b).textContent = Q.o[oi]; b.onclick = () => pick(j); o.appendChild(b); });
+  function pick(j) {
+    if (answered) return; answered = true;
+    const bs = $$(".opt", o); bs.forEach(b => { b.disabled = true; });
+    const right = order.indexOf(Q.a); bs[right].classList.add("right");
+    const ok = j === right;
+    if (ok) { score++; sfx("good"); if (subj === "Review") removeMistake(s, i); }
+    else { bs[j].classList.add("wrong"); sfx("bad"); addMistake(s, i); }
+    metaSpans[1].textContent = t("score", { n: score });
+    const a = $(".q-after", box);
+    a.innerHTML = '<div class="explain"><b></b> <span></span></div><div class="qfoot"><button class="btn btn-ink" type="button" id="nextQ"></button></div>';
+    $(".explain b", a).textContent = ok ? t("correct") : t("wrong"); $(".explain span", a).textContent = Q.why;
+    const nb = $("#nextQ"); nb.textContent = qi === n - 1 ? t("seeResult") : t("nextQ"); nb.onclick = () => { qi++; renderQ(); };
+    if (ok) addXP(10, t("whyCorrect")); else refresh();
+    try { nb.focus({ preventScroll: true }); } catch (e) {}
+  }
+  box._pick = pick;
+}
+function finishRound() {
+  const box = $("#quiz"), n = round.length, perfect = n >= 6 && score === n;
+  P.quizzes++; if (perfect) P.perfects++; save(); checkBadges(); refresh();
+  if (perfect) { celebrate(); sfx("chime"); }
+  const msg = perfect ? t("msgPerfect") : score >= n * .66 ? t("msgGood") : score >= n * .34 ? t("msgMid") : t("msgLow");
+  box.innerHTML = '<div class="result"><span class="eyebrow"></span><div class="big">' + score + "<small>/" + n + '</small></div><p class="r-msg"></p><p class="r-xp mono"></p><div class="r-actions"><button class="btn btn-ink" type="button" id="again"></button></div></div>';
+  $(".result .eyebrow", box).textContent = t("roundDone", { s: subj === "Review" ? t("reviewPrefix") : subjName(subj) });
+  $(".r-msg", box).textContent = msg;
+  $(".r-xp", box).textContent = t("roundXp", { n: score * 10 });
+  $("#again").textContent = t("again");
+  const m = validMistakes().length;
+  if (m && subj !== "Review") { const b = document.createElement("button"); b.type = "button"; b.className = "btn btn-ghost"; b.textContent = t("review", { n: m }); b.onclick = () => { subj = "Review"; startRound(); }; $(".r-actions", box).appendChild(b); }
+  $("#again").onclick = startRound;
+}
+
+/* ================= Flashcards ================= */
+let deck = LS.get("deck2", "words"); if (!DECKS[deck]) deck = "words";
+let pile = [], known = 0, total = 0;
+function renderDecks() { const w = $("#decks"); w.innerHTML = ""; Object.keys(DECKS).forEach(d => chip(w, DECKS[d].name[LANG], d === deck, () => { deck = d; LS.set("deck2", d); renderDecks(); startDeck(); })); }
+function startDeck() { pile = shuffle(DECKS[deck].cards()); known = 0; total = pile.length; showCard(true); }
+function showCard(instant) {
+  const f = $("#fcard"), D = DECKS[deck], wasFlipped = f.classList.contains("flip");
+  f.classList.remove("flip");
+  $("#fcLabelF").textContent = D.labels[LANG][0]; $("#fcLabelB").textContent = D.labels[LANG][1];
+  $("#fcBar").style.width = (total ? known / total * 100 : 0) + "%";
+  const put = () => {
+    const front = pile.length ? pile[0][0] : t("deckDone"), back = pile.length ? pile[0][1] : t("deckDoneBack");
+    const fe = $("#fcFront"), be = $("#fcBack");
+    fe.textContent = front; be.textContent = back;
+    fe.classList.toggle("long", front.length > 26); be.classList.toggle("long", back.length > 26);
+  };
+  if (wasFlipped && !instant) setTimeout(put, 180); else put();
+  $("#fcCount").textContent = pile.length ? t("cardsLeft", { n: pile.length, k: known }) : t("cardsLearned", { k: known, t: total });
+  $("#fcKnew").textContent = pile.length ? t("knew") : t("restartDeck");
+  $("#fcAgain").disabled = !pile.length;
+}
+function flip() { $("#fcard").classList.toggle("flip"); }
+function knew() { if (!pile.length) { startDeck(); return; } pile.shift(); known++; P.cards++; save(); addXP(2, t("whyCard")); showCard(); }
+function again() { if (!pile.length) return; pile.push(pile.shift()); showCard(); }
+$("#fcard").addEventListener("click", flip);
+$("#fcKnew").addEventListener("click", knew);
+$("#fcAgain").addEventListener("click", again);
+
+/* ================= Focus timer ================= */
+const LEN = { focus: 25 * 60, break: 5 * 60 };
+const TM = { mode: "focus", left: LEN.focus, running: false, endAt: 0, iv: 0, done: 0 };
+function drawT() {
+  $("#tTime").textContent = pad(Math.floor(TM.left / 60)) + ":" + pad(TM.left % 60);
+  $("#tMode").textContent = TM.mode === "focus" ? t("modeFocus") : t("modeBreak");
+  const arc = $("#tArc"); arc.classList.toggle("brk", TM.mode === "break");
+  arc.style.strokeDashoffset = (653.45 * (1 - TM.left / LEN[TM.mode])).toFixed(1);
+  $("#tStart").textContent = TM.running ? t("pause") : (TM.left < LEN[TM.mode] ? t("resume") : t("start"));
+  $("#tSwitch").textContent = TM.mode === "focus" ? t("toBreak") : t("toFocus");
+  $$("#sessions i").forEach((d, i) => d.classList.toggle("on", i < TM.done));
+}
+function setMode(m) { clearInterval(TM.iv); TM.mode = m; TM.left = LEN[m]; TM.running = false; drawT(); }
+function tick() { TM.left = Math.max(0, Math.ceil((TM.endAt - Date.now()) / 1000)); if (TM.left <= 0) { finishT(); return; } drawT(); }
+function finishT() {
+  clearInterval(TM.iv); TM.running = false; sfx("chime");
+  if (TM.mode === "focus") {
+    TM.done = TM.done >= 4 ? 1 : TM.done + 1;
+    P.focusMin += 25; P.focusSessions++; save();
+    setMode("break"); addXP(25, t("whyFocus"));
+    if (TM.done >= 4) toast(t("fourDone"), 3000);
+  } else { setMode("focus"); toast(t("breakOver"), 2600); }
+}
+$("#tStart").addEventListener("click", () => {
+  ensureAudio();
+  if (TM.running) { clearInterval(TM.iv); TM.left = Math.max(0, Math.ceil((TM.endAt - Date.now()) / 1000)); TM.running = false; }
+  else { TM.endAt = Date.now() + TM.left * 1000; TM.running = true; TM.iv = setInterval(tick, 250); }
+  drawT();
+});
+$("#tReset").addEventListener("click", () => setMode(TM.mode));
+$("#tSwitch").addEventListener("click", () => setMode(TM.mode === "focus" ? "break" : "focus"));
+const taskEl = $("#tTask"); taskEl.value = LS.get("task", ""); taskEl.addEventListener("input", () => LS.set("task", taskEl.value));
+
+/* ================= Ideas board ================= */
+/* Where ideas are kept:
+   - on claude.ai: the page's shared database (everyone the page is shared with)
+   - in the app: Firebase, if firebase-config.js is filled in (see README)
+   - otherwise: this device only */
+let B = null, ideas = [], ifilter = "All", isort = LS.get("isort", "new"), lastPost = 0, renderSeq = 0, ideasState = "loading";
+function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement("script"); s.src = src; s.onload = res; s.onerror = () => rej(new Error("Could not load " + src)); document.head.appendChild(s); }); }
+function localBoard() {
+  let list = LS.get("ideas", []); if (!Array.isArray(list)) list = [];
+  const subs = new Set();
+  const sorted = () => list.slice().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  const emit = () => { LS.set("ideas", list); subs.forEach(f => f(sorted())); };
+  return {
+    mode: "local", me: "me", mod: true,
+    sub(cb) { subs.add(cb); cb(sorted()); return () => subs.delete(cb); },
+    async add(d) { list.push({ id: "i" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), text: d.text, subject: d.subject, author: "me", authorName: d.name, createdAt: Date.now(), likes: [] }); emit(); },
+    async like(it, on) { const x = list.find(y => y.id === it.id); if (x) { x.likes = on ? ["me"] : []; emit(); } },
+    async del(it) { list = list.filter(y => y.id !== it.id); emit(); },
+    async names() { return {}; }
+  };
+}
+async function firebaseBoard(cfg) {
+  const base = "https://www.gstatic.com/firebasejs/10.12.2/";
+  for (const f of ["firebase-app-compat.js", "firebase-auth-compat.js", "firebase-firestore-compat.js"]) await loadScript(base + f);
+  const fb = window.firebase;
+  if (!fb.apps.length) fb.initializeApp(cfg);
+  const cred = await fb.auth().signInAnonymously();
+  const me = cred.user.uid, col = fb.firestore().collection("ideas"), FV = fb.firestore.FieldValue;
+  return {
+    mode: "firebase", me, mod: false,
+    sub(cb, err) { return col.orderBy("createdAt", "desc").limit(200).onSnapshot(s => cb(s.docs.map(d => Object.assign({ id: d.id }, d.data()))), err); },
+    add(d) { return col.add({ text: d.text, subject: d.subject, author: me, authorName: d.name, createdAt: Date.now(), likes: [] }); },
+    like(it, on) { return col.doc(it.id).update({ likes: on ? FV.arrayUnion(me) : FV.arrayRemove(me) }); },
+    del(it) { return col.doc(it.id).delete(); },
+    async names() { return {}; }
+  };
+}
+async function claudeBoard() {
+  const C = window.claude;
+  const [db, user] = await Promise.all([C.use("db"), C.use("user")]);
+  if (!db) return { mode: "signedout" };
+  const me = user ? await user.id() : null, mod = user ? await user.isOwner() : false, col = db.collection("ideas");
+  return {
+    mode: "claude", me, mod,
+    sub(cb, err) { return col.orderBy("createdAt", "desc").limit(200).onSnapshot(s => cb(s.docs.map(d => Object.assign({ id: d.id }, d.data()))), err); },
+    add(d) { return col.add({ text: d.text, subject: d.subject, author: me, createdAt: Date.now(), likes: [] }); },
+    like(it, on) { const l = Array.isArray(it.likes) ? it.likes : []; return col.doc(it.id).update({ likes: on ? Array.from(new Set(l.concat([me]))) : l.filter(x => x !== me) }); },
+    del(it) { return col.doc(it.id).delete(); },
+    async names(ids) {
+      if (!user || !ids.length) return {};
+      try { const ps = await user.profiles(ids), o = {}; ids.forEach(id => { o[id] = (ps[id] && ps[id].name) || ""; }); return o; } catch (e) { return {}; }
+    }
+  };
+}
+async function waitForClaude(ms) {
+  const t0 = Date.now();
+  while (!(window.claude && window.claude.use) && Date.now() - t0 < ms) await new Promise(r => setTimeout(r, 100));
+  return !!(window.claude && window.claude.use);
+}
+async function connectBoard() {
+  if (BUILD === "artifact") return (await waitForClaude(3000)) ? claudeBoard() : localBoard();
+  const cfg = window.BILIM_FIREBASE;
+  if (BUILD === "app" && cfg && cfg.projectId && cfg.apiKey) {
+    try { return await firebaseBoard(cfg); }
+    catch (e) { console.warn("Bilim: Firebase did not connect, using this device only.", e); const lb = localBoard(); lb.fallback = true; return lb; }
+  }
+  return localBoard();
+}
+let noticeKey = "";
+function setNotice(key) { noticeKey = key || ""; const n = $("#ideaNotice"); n.textContent = key ? t(key) : ""; n.hidden = !key; }
+function renderPostingAs() {
+  const el = $("#postingAs");
+  if (!B || B.mode === "signedout") { el.textContent = ""; return; }
+  if (B.mode === "claude") el.textContent = t("postAsClaude");
+  else el.textContent = t("postAs", { name: P.name || t("anon") }) + (B.mode === "local" ? t("postLocal") : "");
+}
+function renderIdeaFilter() { const w = $("#ideaFilter"); w.innerHTML = ""; ["All"].concat(SUBJECTS).forEach(s => chip(w, s === "All" ? t("all") : subjName(s), s === ifilter, () => { ifilter = s; renderIdeaFilter(); renderIdeas(); })); }
+const likeCount = i => Array.isArray(i.likes) ? i.likes.length : 0;
+function ago(ts) { const s = (Date.now() - ts) / 1000; if (s < 60) return t("agoNow"); if (s < 3600) return t("agoMin", { n: Math.floor(s / 60) }); if (s < 86400) return t("agoHr", { n: Math.floor(s / 3600) }); return t("agoDay", { n: Math.floor(s / 86400) }); }
+async function renderIdeas() {
+  const seq = ++renderSeq, box = $("#ideas"), empty = $("#ideasEmpty");
+  if (ideasState !== "ready") { box.innerHTML = ""; empty.hidden = false; empty.textContent = t(ideasState === "loading" ? "loading" : ideasState); return; }
+  let list = ideas.filter(i => ifilter === "All" || i.subject === ifilter);
+  if (isort === "top") list = list.slice().sort((a, b) => (likeCount(b) - likeCount(a)) || ((b.createdAt || 0) - (a.createdAt || 0)));
+  if (!list.length) { box.innerHTML = ""; empty.hidden = false; empty.textContent = ideas.length ? t("emptySubj", { s: subjName(ifilter) }) : t("emptyAll"); return; }
+  let names = {};
+  if (B && B.names) { const ids = Array.from(new Set(list.filter(i => !i.authorName && i.author && i.author !== B.me).map(i => i.author))); if (ids.length) names = await B.names(ids); }
+  if (seq !== renderSeq) return;
+  empty.hidden = true; box.innerHTML = "";
+  list.forEach(it => box.appendChild(ideaEl(it, names)));
+}
+function ideaEl(it, names) {
+  const likes = Array.isArray(it.likes) ? it.likes : [], me = B && B.me, mine = !!me && it.author === me, liked = !!me && likes.includes(me);
+  const el = document.createElement("article"); el.className = "idea";
+  el.innerHTML = '<div class="idea-top"><span class="tag"></span><span class="who"></span><span aria-hidden="true">·</span><time></time></div><p class="idea-text"></p><div class="idea-foot"><button type="button" class="like" aria-pressed="' + liked + '"><span>' + ico("heart", 16) + '</span><b class="n">' + likes.length + "</b></button></div>";
+  const tag = $(".tag", el); tag.textContent = SUBJ_NAMES[it.subject] ? subjName(it.subject) : subjName("General"); tag.style.background = SUBJ_BG[it.subject] || "var(--surface-2)";
+  $(".who", el).textContent = mine ? t("you") : (it.authorName || names[it.author] || t("anon"));
+  const tm = $("time", el), ts = it.createdAt || Date.now(); tm.textContent = ago(ts); try { tm.dateTime = new Date(ts).toISOString(); } catch (e) {}
+  $(".idea-text", el).textContent = it.text || "";
+  const lb = $(".like", el);
+  lb.setAttribute("aria-label", liked ? t("unlikeAria") : t("likeAria"));
+  lb.addEventListener("click", async () => {
+    if (!B || !B.me || !B.like) { toast(t("signInLike")); return; }
+    lb.disabled = true;
+    try { await B.like(it, !liked); } catch (e) { toast(t("likeFail")); lb.disabled = false; }
+  });
+  if (mine || (B && B.mod)) {
+    const d = document.createElement("button"); d.type = "button"; d.className = "del"; d.textContent = t("del");
+    let armed = false, timer = 0;
+    d.addEventListener("click", async () => {
+      if (!armed) { armed = true; d.textContent = t("delConfirm"); timer = setTimeout(() => { armed = false; d.textContent = t("del"); }, 3000); return; }
+      clearTimeout(timer);
+      try { await B.del(it); toast(t("deleted")); } catch (e) { toast(t("delFail")); }
+    });
+    $(".idea-foot", el).appendChild(d);
+  }
+  return el;
+}
+$("#ideaText").addEventListener("input", e => { $("#ideaCount").textContent = e.target.value.length + " / 280"; });
+$("#ideaSort").value = isort === "top" ? "top" : "new";
+$("#ideaSort").addEventListener("change", e => { isort = e.target.value; LS.set("isort", isort); renderIdeas(); });
+$("#compose").addEventListener("submit", async e => {
+  e.preventDefault();
+  const text = $("#ideaText").value.trim();
+  if (text.length < 3) { toast(t("writeMore")); return; }
+  if (!B || !B.add || !B.me) { setNotice(B && (B.mode === "signedout" || B.mode === "claude") ? "signedOut" : "notReady"); return; }
+  if (Date.now() - lastPost < 15000) { toast(t("waitPost")); return; }
+  const btn = $("#ideaPost"), subject = $("#ideaSubject").value; btn.disabled = true;
+  try {
+    await B.add({ text: text.slice(0, 280), subject: subject, name: (P.name || "").slice(0, 24) });
+    lastPost = Date.now(); setNotice("");
+    $("#ideaText").value = ""; $("#ideaCount").textContent = "0 / 280";
+    P.ideas++; save(); addXP(15, t("whyIdea"));
+    if (ifilter !== "All" && ifilter !== subject) { ifilter = "All"; renderIdeaFilter(); renderIdeas(); }
+  } catch (err) {
+    setNotice(B.mode === "claude" ? "postFailClaude" : "postFailNet");
+  }
+  btn.disabled = false;
+});
+async function initIdeas() {
+  ideasState = "loading"; renderIdeas();
+  let loaded = false;
+  const timer = setTimeout(() => { if (!loaded) { ideasState = "slow"; renderIdeas(); } }, 10000);
+  try { B = await connectBoard(); } catch (e) { B = null; }
+  renderPostingAs();
+  if (!B) { clearTimeout(timer); ideasState = "noConnect"; renderIdeas(); return; }
+  if (B.mode === "signedout") { clearTimeout(timer); ideasState = "signedOut"; renderIdeas(); setNotice("signedOutNote"); return; }
+  if (B.fallback) setNotice("fallback");
+  B.sub(list => { loaded = true; clearTimeout(timer); ideas = list; ideasState = "ready"; renderIdeas(); },
+        () => { loaded = true; clearTimeout(timer); ideasState = "noConnect"; renderIdeas(); });
+}
+
+/* ================= Profile ================= */
+function renderProfile() {
+  const li = levelOf(P.xp);
+  const rows = [[t("st_xp"), fmt(P.xp)], [t("st_alt"), fmt(LEVELS[li].alt) + mUnit()], [t("st_best"), tn("bestDays", P.bestStreak)], [t("st_quiz"), fmt(P.quizzes)], [t("st_perfect"), fmt(P.perfects)], [t("st_cards"), fmt(P.cards)], [t("st_focus"), fmt(P.focusMin)], [t("st_ideas"), fmt(P.ideas)]];
+  const sl = $("#statList"); sl.innerHTML = "";
+  rows.forEach(r => { const d = document.createElement("div"); d.innerHTML = "<dt></dt><dd></dd>"; d.firstChild.textContent = r[0]; d.lastChild.textContent = r[1]; sl.appendChild(d); });
+  const bg = $("#badgeGrid"); bg.innerHTML = "";
+  BADGES.forEach(b => {
+    const got = P.badges[b.id], el = document.createElement("div");
+    el.className = "badge-card" + (got ? " got" : "");
+    el.innerHTML = badgeIco(b) + "<div><b></b><span></span></div>";
+    $("b", el).textContent = bName(b); $("div span", el).textContent = got ? t("earned", { d: got }) : bDesc(b);
+    bg.appendChild(el);
+  });
+}
+function initProfile() {
+  const n = $("#meName"); n.value = P.name;
+  n.addEventListener("input", () => { P.name = n.value.trim().slice(0, 24); save(); renderHero(); renderPostingAs(); });
+  const g = $("#meGoal"); g.value = String(P.goal);
+  g.addEventListener("change", () => { P.goal = +g.value || 50; const k = dayKey(); if ((P.days[k] || 0) >= P.goal) P.met[k] = true; save(); refresh(); });
+  const s = $("#meSound"); s.checked = !!P.sound;
+  s.addEventListener("change", () => { P.sound = s.checked; save(); if (P.sound) sfx("good"); });
+  $("#meLang").addEventListener("change", e => setLang(e.target.value));
+  const r = $("#resetBtn"); let armed = false, tmr = 0;
+  r.addEventListener("click", () => {
+    if (!armed) { armed = true; r.textContent = t("resetConfirm"); tmr = setTimeout(() => { armed = false; r.textContent = t("resetBtn"); }, 4000); return; }
+    clearTimeout(tmr); armed = false; r.textContent = t("resetBtn");
+    P = Object.assign(fresh(), { name: P.name, goal: P.goal, sound: P.sound, theme: P.theme });
+    save(); refresh(); renderDaily(); startRound(); toast(t("resetDone"));
+  });
+}
+
+/* ================= Language ================= */
+function applyStatic() {
+  document.documentElement.lang = LANG;
+  $$("[data-t]").forEach(el => { el.textContent = t(el.dataset.t); });
+  $$("[data-t-ph]").forEach(el => { el.placeholder = t(el.dataset.tPh); });
+  $$("[data-t-aria]").forEach(el => { el.setAttribute("aria-label", t(el.dataset.tAria)); });
+  $$("[data-t-title]").forEach(el => { el.title = t(el.dataset.tTitle); });
+  $("#langBtn").textContent = t("langCode");
+  $("#meLang").value = LANG;
+  $("#meGoal").value = String(P.goal);
+}
+function setLang(l, quiet) {
+  if (!STR[l]) return;
+  LANG = l; LS.set("lang", l);
+  applyStatic(); renderCheckpoints(); renderRoomMeta();
+  refresh(); renderDaily(); startRound(); renderDecks(); startDeck(); drawT();
+  renderIdeaFilter(); renderIdeas(); renderPostingAs(); if (noticeKey) setNotice(noticeKey); applyTheme();
+  if (!quiet) toast(t("langToast"));
+}
+function showWelcome() {
+  const w = $("#welcome");
+  w.hidden = false; document.documentElement.classList.add("lock");
+  $$(".w-lang", w).forEach(b => b.addEventListener("click", () => {
+    setLang(b.dataset.lang, true);
+    w.hidden = true; document.documentElement.classList.remove("lock");
+  }));
+  setTimeout(() => { const c = $(".welcome-card", w); if (c) { try { c.focus({ preventScroll: true }); } catch (e) {} } }, 60);
+}
+$("#langBtn").addEventListener("click", () => setLang(LANGS[(LANGS.indexOf(LANG) + 1) % LANGS.length]));
+
+/* ================= App extras: theme + install ================= */
+const THEMES = ["system", "light", "dark"];
+const THEME_KEY = { system: "themeSystem", light: "themeLight", dark: "themeDark" };
+const THEME_TOAST = { system: "themeToastSystem", light: "themeToastLight", dark: "themeToastDark" };
+function applyTheme() {
+  if (BUILD !== "app") return;
+  const r = document.documentElement;
+  if (P.theme === "light" || P.theme === "dark") r.setAttribute("data-theme", P.theme); else r.removeAttribute("data-theme");
+  const b = $("#themeBtn");
+  b.innerHTML = ico(P.theme === "dark" ? "moon" : P.theme === "light" ? "sun" : "contrast", 19);
+  const label = t("themeAria", { t: t(THEME_KEY[P.theme] || "themeSystem") });
+  b.setAttribute("aria-label", label); b.title = label;
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) requestAnimationFrame(() => { const c = getComputedStyle(r).getPropertyValue("--surface").trim(); if (c) meta.setAttribute("content", c); });
+}
+function initApp() {
+  $$(".app-only").forEach(el => { el.hidden = false; });
+  $("#themeBtn").addEventListener("click", () => {
+    P.theme = THEMES[(THEMES.indexOf(P.theme) + 1) % THEMES.length]; save(); applyTheme();
+    toast(t(THEME_TOAST[P.theme] || "themeToastSystem"));
+  });
+  if (window.matchMedia) { const mq = window.matchMedia("(prefers-color-scheme: dark)"); if (mq.addEventListener) mq.addEventListener("change", applyTheme); }
+  let deferred = null;
+  const btns = () => [$("#installBtn"), $("#installBtn2")].filter(Boolean);
+  window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferred = e; btns().forEach(b => { b.hidden = false; }); });
+  const doInstall = async () => {
+    if (!deferred) { toast(t("installMenu")); return; }
+    deferred.prompt(); try { await deferred.userChoice; } catch (e) {}
+    deferred = null; btns().forEach(b => { b.hidden = true; });
+  };
+  btns().forEach(b => b.addEventListener("click", doInstall));
+  window.addEventListener("appinstalled", () => toast(t("installed"), 3000));
+  const standalone = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || navigator.standalone;
+  if (standalone) $("#getApp").hidden = true;
+}
+
+/* ================= Routing ================= */
+const VIEWS = ["home", "practice", "cards", "ideas", "focus", "me"]; let current = "home";
+function show(v) {
+  if (!VIEWS.includes(v)) v = "home";
+  current = v;
+  $$(".view").forEach(s => { s.hidden = s.dataset.view !== v; });
+  $$("[data-tab]").forEach(a => { if (a.dataset.tab === v) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+  const av = $("#avatarBtn"); if (v === "me") av.setAttribute("aria-current", "page"); else av.removeAttribute("aria-current");
+  if (v === "me") renderProfile();
+  window.scrollTo(0, 0);
+}
+window.addEventListener("hashchange", () => show(location.hash.slice(1)));
+document.addEventListener("click", e => {
+  const a = e.target.closest('a[href^="#"]');
+  if (a && a.getAttribute("href") === location.hash) show(location.hash.slice(1));
+});
+document.addEventListener("keydown", e => {
+  if (!$("#welcome").hidden) return;
+  if ((e.target.closest && e.target.closest("input,textarea,select")) || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (current === "practice") {
+    const k = e.key.toLowerCase(); let j = "1234".indexOf(k); if (j < 0) j = "abcd".indexOf(k);
+    if (k.length === 1 && j >= 0 && !answered && $("#quiz .opt") && $("#quiz")._pick) { e.preventDefault(); $("#quiz")._pick(j); }
+    else if (e.key === "Enter" && answered) { const nb = $("#nextQ"); if (nb && document.activeElement !== nb) { e.preventDefault(); nb.click(); } }
+  } else if (current === "cards") {
+    if (e.key === " " || e.key === "Enter") { const ae = document.activeElement; if (ae && ae.closest && ae.closest("button,a")) return; e.preventDefault(); flip(); }
+    else if (e.key === "ArrowRight") { e.preventDefault(); knew(); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); again(); }
+  }
+});
+
+function refresh() { renderHero(); renderToday(); renderBadgeStrip(); renderSubjects(); if (current === "me") renderProfile(); }
+
+/* ================= Start ================= */
+paintIcons(document);
+applyStatic();
+initScene();
+renderRoomMeta();
+if (BUILD === "app") initApp();
+applyTheme();
+initProfile();
+save(); checkBadges();
+refresh(); renderDaily(); startRound(); renderDecks(); startDeck(); drawT(); renderIdeaFilter();
+show(location.hash.slice(1) || "home");
+initIdeas();
+if (!chosenLang) showWelcome();
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { refresh(); renderDaily(); } });
+})();
+</script>
+<script>
+// Turn on offline mode (works when the site is online over https).
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
+</script>
+</body>
+</html>
